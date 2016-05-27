@@ -5,9 +5,10 @@ Language = Java
 ScannerName = Lexico
 ParserName = Sintatico
 SemanticName = Semantico
+Package = br.com.primec.core
 ScannerCaseSensitive = true
 ScannerTable = Compact
-Input = Stream
+Input = String
 Parser = SLR
 #RegularDefinitions
 L        : [A-Za-z]
