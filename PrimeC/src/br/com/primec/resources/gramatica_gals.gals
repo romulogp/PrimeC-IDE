@@ -170,7 +170,7 @@ OUTPUT     = ID : "output"
 		  | ID #100 "=" <expression> ;
 
 <v_dec>     	::= <v_typ> ID #2
-		  | <vect> #6 ;
+		  | <vect> #4 ;
 
 <vect>		::= <v_typ> "[" <expression> "]" ID ;
 
@@ -224,9 +224,9 @@ OUTPUT     = ID : "output"
 
 <op_relational>	::= OP_GT | OP_LT | OP_GTE | OP_LTE | OP_NEQ | OP_EQ ;
 
-<op_term>	::= OP_MAIS | OP_MENOS ;
+<op_term>	::= OP_MAIS #50 | OP_MENOS #51 ;
 
-<op_factor>	::= OP_VEZES | OP_DIVISAO ;
+<op_factor>	::= OP_VEZES #52 | OP_DIVISAO #53 ;
 
 <input>		::= INPUT "(" <v_val> "," ID #100 ")"
 		  | INPUT "(" <v_val> "," ID #100 "[" <expression> "]" ")" ;
