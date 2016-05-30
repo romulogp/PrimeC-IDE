@@ -21,8 +21,12 @@ public class Semantico implements Constants {
                 System.out.print("Declaração de função: ");
                 action3(token);
                 break;
-            case 6:
+            case 4:
                 System.out.println("Declaração de vetor: ");
+                action4(token);
+                break;
+            case 6:
+                System.out.println("Atribuição de valor");
                 action6(token);
                 break;
             case 9:
@@ -81,7 +85,7 @@ public class Semantico implements Constants {
         pushScope(token);
     }
 
-    private void action6(Token token) throws SemanticError {
+    private void action4(Token token) throws SemanticError {
         currentSymbol.setName(token.getLexeme());
         currentSymbol.setScope(PrimecIDE.stack.lastElement());
         currentSymbol.setVect(true);
@@ -92,6 +96,10 @@ public class Semantico implements Constants {
         }
     }
 
+    private void action6(Token token) throws SemanticError {
+        
+    }
+    
     private void pushScope(Token token) {
         System.out.println("Escopo alterado de \"" + PrimecIDE.stack.lastElement() + "\" para \"" + token.getLexeme() + "\"");
         PrimecIDE.stack.push(token.getLexeme());

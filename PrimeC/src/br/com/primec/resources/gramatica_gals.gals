@@ -8,7 +8,7 @@ SemanticName = Semantico
 Package = br.com.primec.core
 ScannerCaseSensitive = true
 ScannerTable = Compact
-Input = String
+Input = Stream
 Parser = SLR
 #RegularDefinitions
 L        : [A-Za-z]
@@ -166,8 +166,8 @@ OUTPUT     = ID : "output"
 
 <attrib>    	::= <v_dec> #45 "=" <func_call>
 		  | <v_dec> #45 "=" <expression>
-		  | ID #100 "=" <expression>
-		  | ID #100 "=" <func_call> ;
+		  | ID #100 "=" <func_call>
+		  | ID #100 "=" <expression> ;
 
 <v_dec>     	::= <v_typ> ID #2
 		  | <vect> #6 ;

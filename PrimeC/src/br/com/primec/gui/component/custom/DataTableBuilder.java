@@ -6,7 +6,7 @@ import javax.swing.JFrame;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-public class CustomJTable extends JFrame {
+public class DataTableBuilder extends JFrame {
     
     private final JTable table;
 
@@ -14,7 +14,7 @@ public class CustomJTable extends JFrame {
         return table;
     }
     
-    public CustomJTable(List<Symbol> symbolTable) {
+    public DataTableBuilder(List<Symbol> symbolTable) {
         int COLUMNS = 10;
         Object[][] data = new Object[symbolTable.size()][COLUMNS];
         Object[] columnNames = {

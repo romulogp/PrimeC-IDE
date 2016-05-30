@@ -1,0 +1,13 @@
+﻿#1 Tipo de variáveis
+#2 Declaração de variável
+#3 Declaração de função
+#4 Atribuição de valor
+#5 Atribuição com chamada de função
+#6 Declaração de Vetor
+#9  Empilha escopo - stack.push(token)
+#10 Desempilha escopo - stack.pop(token)
+#11 Valor de variável
+#20 Alteração de escopo
+#24 Variável parâmetro de função
+#45 Inicialização de variável
+#100 Uso de variável
