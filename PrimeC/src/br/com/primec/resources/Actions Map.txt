@@ -8,10 +8,9 @@ Atribuição com chamada de função
 #20 Alteração de escopo
 #24 Variável parâmetro de função
 #45 Inicialização de variável
-#50 SOMA
-#51 SUBTRAÇÃO
-#52 MULTIPLICAÇÃO
-#53 DIVISÃO
-#54 NEGATIVO
-#55 EMPILHA VALOR DE ID
+#50 Soma ou Subtração
+#51 Multiplicação ou Divisão
+#52 Negativo
+#60 Valor do Tipo Inteiro
+#61 Valor do Tipo Double
 #100 Uso de variável
