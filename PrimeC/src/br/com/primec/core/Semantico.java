@@ -1,11 +1,14 @@
 package br.com.primec.core;
 
 import br.com.primec.gui.PrimecIDE;
+import java.util.Stack;
 
 public class Semantico implements Constants {
 
     private Symbol currentSymbol;
-
+    private final Stack<String> valueStack = new Stack<>();
+    private Operation currentOperation;
+    
     public void executeAction(int action, Token token) throws SemanticError {
         System.out.print("\nAção: #" + action + " - ");
         switch (action) {
@@ -45,6 +48,10 @@ public class Semantico implements Constants {
                 // Var Initialization
                 action45(token);
                 break;
+            case 49:
+                // Current Operation
+                setCurrentOperation(token);
+                break;
             case 50:
                 // Sum and Subtract
                 action50(token);
@@ -58,9 +65,11 @@ public class Semantico implements Constants {
                 action52(token);
                 break;
             case 60:
+                // INTEGER value found
                 action60(token);
                 break;
             case 61:
+                // DOUBLE value found
                 action61(token);
                 break;
             case 100:
@@ -83,7 +92,7 @@ public class Semantico implements Constants {
 
     private void action2(Token token) throws SemanticError {
         currentSymbol.setName(token.getLexeme());
-        currentSymbol.setScope(PrimecIDE.stack.lastElement());
+        currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         try {
             addSymbol(currentSymbol);
         } catch (SemanticError se) {
@@ -93,7 +102,7 @@ public class Semantico implements Constants {
 
     private void action3(Token token) throws SemanticError {
         currentSymbol.setName(token.getLexeme());
-        currentSymbol.setScope(PrimecIDE.stack.lastElement());
+        currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setFunction(true);
         try {
             addSymbol(currentSymbol);
@@ -105,7 +114,7 @@ public class Semantico implements Constants {
 
     private void action4(Token token) throws SemanticError {
         currentSymbol.setName(token.getLexeme());
-        currentSymbol.setScope(PrimecIDE.stack.lastElement());
+        currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setVect(true);
         try {
             addSymbol(currentSymbol);
@@ -115,13 +124,13 @@ public class Semantico implements Constants {
     }
 
     private void pushScope(Token token) {
-        System.out.println("Escopo alterado de \"" + PrimecIDE.stack.lastElement() + "\" para \"" + token.getLexeme() + "\"");
-        PrimecIDE.stack.push(token.getLexeme());
+        System.out.println("Escopo alterado de \"" + PrimecIDE.scopeStack.lastElement() + "\" para \"" + token.getLexeme() + "\"");
+        PrimecIDE.scopeStack.push(token.getLexeme());
     }
 
     private void popScope(Token token) {
-        String value = PrimecIDE.stack.pop();
-        System.out.println("Escopo alterado de \"" + value + "\" para \"" + PrimecIDE.stack.lastElement() + "\"");
+        String value = PrimecIDE.scopeStack.pop();
+        System.out.println("Escopo alterado de \"" + value + "\" para \"" + PrimecIDE.scopeStack.lastElement() + "\"");
     }
 
     private void action20(Token token) throws SemanticError {
@@ -131,7 +140,7 @@ public class Semantico implements Constants {
 
     private void action24(Token token) throws SemanticError {
         currentSymbol.setName(token.getLexeme());
-        currentSymbol.setScope(PrimecIDE.stack.lastElement());
+        currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setParam(true);
         try {
             addSymbol(currentSymbol);
@@ -143,9 +152,27 @@ public class Semantico implements Constants {
     private void action45(Token token) {
         currentSymbol = new Symbol();
         currentSymbol.setName(token.getLexeme());
-        PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.stack).setInitialized(true);
+        PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack).setInitialized(true);
     }
 
+    private void setCurrentOperation(Token token) {
+        char op = token.getLexeme().charAt(0);
+        switch (op) {
+            case '+':
+                currentOperation = Operation.OP_MAIS;
+                break;
+            case '-':
+                currentOperation = Operation.OP_MENOS;
+                break;
+            case '*':
+                currentOperation = Operation.OP_VEZES;
+                break;
+            case '/':
+                currentOperation = Operation.OP_DIVISAO;
+                break;
+        }
+    }
+    
     public void action50(Token token) {
         
     }
@@ -159,18 +186,20 @@ public class Semantico implements Constants {
     }
     
     public void action60(Token token) {
-        
+        System.out.println("INTEGER value found: " + token.getLexeme());
+        valueStack.push(token.getLexeme());
     }
     
     public void action61(Token token) {
-        
+        System.out.println("DOUBLE value found: " + token.getLexeme());
+        valueStack.push(token.getLexeme());
     }
     
     private void action100(Token token) throws SemanticError {
         currentSymbol = new Symbol();
         currentSymbol.setName(token.getLexeme());
-        currentSymbol.setScope(PrimecIDE.stack.lastElement());
-        Symbol symbolToSet = PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.stack);
+        currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
+        Symbol symbolToSet = PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack);
         if (symbolToSet != null) {
             symbolToSet.setUsed(true);
         } else {
@@ -179,7 +208,7 @@ public class Semantico implements Constants {
     }
 
     private void modifyScope() {
-        PrimecIDE.stack.push(PrimecIDE.stack.pop() + PrimecIDE.getNextScopeSerial());
+        PrimecIDE.scopeStack.push(PrimecIDE.scopeStack.pop() + PrimecIDE.getNextScopeSerial());
     }
 
     private void addSymbol(Symbol symbol) throws SemanticError {

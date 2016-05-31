@@ -8,7 +8,6 @@ import br.com.primec.core.Semantico;
 import br.com.primec.core.Sintatico;
 import br.com.primec.core.SymbolTable;
 import br.com.primec.core.SyntaticError;
-import java.io.File;
 import java.util.Stack;
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
@@ -19,7 +18,7 @@ public class PrimecIDE extends javax.swing.JFrame {
     private Lexico lexico;
     private Sintatico sintatico;
     private Semantico semantico;
-    public static Stack<String> stack;    // pilha de escopo
+    public static Stack<String> scopeStack;    // pilha de escopo
     public static SymbolTable symbolTable;
     public SymbolTableView symbolTableView;
     public boolean containError = true;
@@ -44,8 +43,8 @@ public class PrimecIDE extends javax.swing.JFrame {
     }
 
     private void initSemanticComponents() {
-        stack = new Stack();
-        stack.push(Scope.GLOBAL.getDescription());
+        scopeStack = new Stack();
+        scopeStack.push(Scope.GLOBAL.getDescription());
         symbolTable = new SymbolTable();
         scopeSerialId = 0;
     }

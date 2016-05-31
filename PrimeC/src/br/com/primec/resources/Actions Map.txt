@@ -8,6 +8,7 @@ Atribuição com chamada de função
 #20 Alteração de escopo
 #24 Variável parâmetro de função
 #45 Inicialização de variável
+#49 Operacao Atual
 #50 Soma ou Subtração
 #51 Multiplicação ou Divisão
 #52 Negativo
