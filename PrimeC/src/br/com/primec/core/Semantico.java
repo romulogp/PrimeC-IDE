@@ -11,81 +11,83 @@ public class Semantico implements Constants {
     private Symbol currentSymbol;
     private final Stack<String> stackingValues = new Stack<>();
     private Operation currentOperation;
+    private Token currentToken;
     
-    public void executeAction(int action, Token token) throws SemanticError {
-        System.out.print("\nAção: #" + action + " - ");
+    public void executeAction(int action, Token currentToken) throws SemanticError {
+        this.currentToken = currentToken;
         switch (action) {
             case 1:
                 // Var Type Detection
-                action1(token);
+                action1();
                 break;
             case 2:
                 // Var Declaration
-                action2(token);
+                action2();
                 break;
             case 3:
                 // Function Declaration
-                action3(token);
+                action3();
                 break;
             case 4:
                 // Vector Declaration
-                action4(token);
+                action4();
                 break;
             case 9:
                 // Push Scope
-                pushScope(token);
+                pushScope();
                 break;
             case 10:
                 // Pop Scope
-                popScope(token);
+                popScope();
                 break;
             case 20:
                 // Scope Change due to multiple ID's control
-                action20(token);
+                action20();
                 break;
             case 24:
                 // Function Parameters Declaration
-                action24(token);
+                action24();
                 break;
             case 45:
                 // Var Initialization
-                action45(token);
+                action45();
                 break;
             case 49:
                 // Current Operation
-                setCurrentOperation(token);
+                setCurrentOperation();
                 break;
             case 50:
                 // Left Shift
-                action50(token);
+                action50();
                 break;
             case 51:
                 // Right Shift
-                action51(token);
+                action51();
                 break;
             case 60:
-                action60(token);
+                action60();
                 break;
             case 62:
                 // Negative
+                action62();
                 break;
             case 70:
                 // INTEGER value found
-                action70(token);
+                action70();
                 break;
             case 71:
                 // DOUBLE value found
-                action71(token);
+                action71();
                 break;
             case 100:
                 // Var being Used
-                action100(token);
+                action100();
                 break;
         }
-        showLog(token);
+        showLog();
     }
 
-    private void showLog(Token currentToken) {
+    private void showLog() {
         System.out.print(currentToken.getLexeme());
         System.out.println(PrimecIDE.symbolTable.toString());
     }
@@ -99,78 +101,78 @@ public class Semantico implements Constants {
         currentSymbol = null;
     }
     
-    private void pushScope(Token token) {
-        System.out.println("Escopo alterado de \"" + PrimecIDE.scopeStack.lastElement() + "\" para \"" + token.getLexeme() + "\"");
-        PrimecIDE.scopeStack.push(token.getLexeme());
+    private void pushScope() {
+        System.out.println("Escopo alterado de \"" + PrimecIDE.scopeStack.lastElement() + "\" para \"" + currentToken.getLexeme() + "\"");
+        PrimecIDE.scopeStack.push(currentToken.getLexeme());
     }
 
-    private void popScope(Token token) {
+    private void popScope() {
         String value = PrimecIDE.scopeStack.pop();
         System.out.println("Escopo alterado de \"" + value + "\" para \"" + PrimecIDE.scopeStack.lastElement() + "\"");
     }
     
-    private void action1(Token token) {
+    private void action1() {
         currentSymbol = new Symbol();
-        currentSymbol.setType(token.getLexeme());
+        currentSymbol.setType(currentToken.getLexeme());
     }
 
-    private void action2(Token token) throws SemanticError {
-        currentSymbol.setName(token.getLexeme());
+    private void action2() throws SemanticError {
+        currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         try {
             addSymbol(currentSymbol);
         } catch (SemanticError se) {
-            throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", token.getPosition());
+            throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
         }
     }
 
-    private void action3(Token token) throws SemanticError {
-        currentSymbol.setName(token.getLexeme());
+    private void action3() throws SemanticError {
+        currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setFunction(true);
         try {
             addSymbol(currentSymbol);
         } catch (SemanticError se) {
-            throw new SemanticError("A função \"" + currentSymbol.getName() + "\" já foi declarada.", token.getPosition());
+            throw new SemanticError("A função \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
         }
-        pushScope(token);
+        pushScope();
     }
 
-    private void action4(Token token) throws SemanticError {
-        currentSymbol.setName(token.getLexeme());
+    private void action4() throws SemanticError {
+        currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setVect(true);
         try {
             addSymbol(currentSymbol);
         } catch (SemanticError se) {
-            throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", token.getPosition());
+            throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
         }
     }
 
-    private void action20(Token token) throws SemanticError {
+    private void action20() throws SemanticError {
         modifyScope();
-        action2(token);
+        action2();
     }
 
-    private void action24(Token token) throws SemanticError {
-        currentSymbol.setName(token.getLexeme());
+    private void action24() throws SemanticError {
+        currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setParam(true);
         try {
             addSymbol(currentSymbol);
         } catch (SemanticError se) {
-            throw new SemanticError("A variável " + currentSymbol.getName() + " já foi declarada.", token.getPosition());
+            throw new SemanticError("A variável " + currentSymbol.getName() + " já foi declarada.", currentToken.getPosition());
         }
     }
 
-    private void action45(Token token) {
+    private void action45() {
         currentSymbol = new Symbol();
-        currentSymbol.setName(token.getLexeme());
+        currentSymbol.setName(currentToken.getLexeme());
         PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack).setInitialized(true);
     }
 
-    private void setCurrentOperation(Token token) {
-        String OP = token.getLexeme();
+    private void setCurrentOperation() {
+        String OP = currentToken.getLexeme();
         
         Operation[] operations = Operation.values();
         for (Operation operation : operations) {
@@ -180,31 +182,35 @@ public class Semantico implements Constants {
         }
     }
     
-    public void action50(Token token) {
+    public void action50() {
         
     }
     
-    public void action51(Token token) {
+    public void action51() {
         
     }
     
-    public void action60(Token token) {
+    public void action60() {
         
     }
     
-    public void action70(Token token) {
-        System.out.println("INTEGER value found: " + token.getLexeme());
-        stackingValues.push(token.getLexeme());
+    public void action62() {
+        
     }
     
-    public void action71(Token token) {
-        System.out.println("DOUBLE value found: " + token.getLexeme());
-        stackingValues.push(token.getLexeme());
+    public void action70() {
+        System.out.println("INTEGER value found: " + currentToken.getLexeme());
+        stackingValues.push(currentToken.getLexeme());
     }
     
-    private void action100(Token token) throws SemanticError {
+    public void action71() {
+        System.out.println("DOUBLE value found: " + currentToken.getLexeme());
+        stackingValues.push(currentToken.getLexeme());
+    }
+    
+    private void action100() throws SemanticError {
         currentSymbol = new Symbol();
-        currentSymbol.setName(token.getLexeme());
+        currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         Symbol symbolToSet = PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack);
         if (symbolToSet != null) {
