@@ -1,11 +1,11 @@
 package br.com.primec.main;
 
-import br.com.primec.core.LexicalError;
+import br.com.primec.core.exception.LexicalError;
 import br.com.primec.core.Lexico;
-import br.com.primec.core.SemanticError;
+import br.com.primec.core.exception.SemanticError;
 import br.com.primec.core.Semantico;
 import br.com.primec.core.Sintatico;
-import br.com.primec.core.SyntaticError;
+import br.com.primec.core.exception.SyntaticError;
 import br.com.primec.gui.PrimecIDE;
 
 public class Main {

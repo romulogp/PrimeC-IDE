@@ -1,5 +1,6 @@
-package br.com.primec.core;
+package br.com.primec.core.table;
 
+import br.com.primec.core.exception.SemanticError;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;

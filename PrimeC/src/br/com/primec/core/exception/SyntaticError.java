@@ -1,4 +1,6 @@
-package br.com.primec.core;
+package br.com.primec.core.exception;
+
+import br.com.primec.core.exception.AnalysisError;
 
 public class SyntaticError extends AnalysisError {
 

@@ -1,5 +1,7 @@
 package br.com.primec.core;
 
+import br.com.primec.core.exception.LexicalError;
+
 public class Lexico implements Constants {
 
     private int position;

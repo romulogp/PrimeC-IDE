@@ -1,6 +1,6 @@
 package br.com.primec.gui;
 
-import br.com.primec.core.Symbol;
+import br.com.primec.core.table.Symbol;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 

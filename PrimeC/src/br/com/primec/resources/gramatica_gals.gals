@@ -182,8 +182,8 @@ OUTPUT     = ID : "output"
 
 <v_val>     	::= HEX_VL
 		  | BIN_VL
-		  | INT_VL #5
-		  | DBL_VL
+		  | INT_VL #70
+		  | DBL_VL #71
 		  | BOOL_VL
 		  | STR_VL ;
 
@@ -207,19 +207,19 @@ OUTPUT     = ID : "output"
 		  | ELSE #9 "{" "}" #10 
 		  | ELSE #9 "{" <cmd_seq> "}" #10 ;
 
-<expression>	::= <expression> OP_LSHIFT <expression1> | <expression1> ;
-<expression1>	::= <expression1> OP_RSHIFT <expression2> | <expression2> ;
+<expression>	::= <expression>	 OP_LSHIFT #49 <expression1> #50	| <expression1> ;
+<expression1>	::= <expression1> OP_RSHIFT #49 <expression2> #51	| <expression2> ;
 <expression2>	::= <expression2> OP_BWS_AND <expression3> | <expression3> ;
-<expression3>	::= <expression3> OP_BWS_OR <expression4> | <expression4> ;
+<expression3>	::= <expression3> OP_BWS_OR <expression4>	| <expression4> ;
 <expression4>	::= <expression4> OP_BWS_XOR <expression5> | <expression5> ;
 <expression5>	::= <expression5> OP_BWS_NOT <expression6> | <expression6> ;
 <expression6>	::= <expression6> OP_OR <expression7> | <expression7> ;
-<expression7>	::= <expression7> OP_AND <expression8> | <expression8> ;
+<expression7>	::= <expression7> OP_AND	<expression8> | <expression8> ;
 <expression8>	::= OP_NOT <expression8> | <expression9> ;
-<expression9>	::= <expression9> <op_relational> <expression10> | <expression10> ;
-<expression10>	::= <expression10> <op_term> <expression11> #50 | <expression11> ;
-<expression11>	::= <expression11> <op_factor> <expression12> #51 | <expression12> ;
-<expression12>	::= OP_MENOS <expression12> #52 | <expression13> ;
+<expression9>	::= <expression9> <op_relational> <expression10>	| <expression10> ;
+<expression10>	::= <expression10> <op_term> #49 <expression11> #60 | <expression11> ;
+<expression11>	::= <expression11> <op_factor> <expression12> #61 | <expression12> ;
+<expression12>	::= OP_MENOS #49 <expression12> #62 | <expression13> ;
 <expression13>	::= <v_val> | "(" <expression> ")" | ID #100 ;
 
 <op_relational>	::= OP_GT | OP_LT | OP_GTE | OP_LTE | OP_NEQ | OP_EQ ;

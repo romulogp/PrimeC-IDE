@@ -1,5 +1,8 @@
 package br.com.primec.core;
 
+import br.com.primec.core.exception.SyntaticError;
+import br.com.primec.core.exception.SemanticError;
+import br.com.primec.core.exception.LexicalError;
 import java.util.Stack;
 
 public class Sintatico implements Constants {

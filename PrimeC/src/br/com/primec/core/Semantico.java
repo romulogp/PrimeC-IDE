@@ -1,12 +1,15 @@
 package br.com.primec.core;
 
+import br.com.primec.core.table.Operation;
+import br.com.primec.core.table.Symbol;
+import br.com.primec.core.exception.SemanticError;
 import br.com.primec.gui.PrimecIDE;
 import java.util.Stack;
 
 public class Semantico implements Constants {
 
     private Symbol currentSymbol;
-    private final Stack<String> valueStack = new Stack<>();
+    private final Stack<String> stackingValues = new Stack<>();
     private Operation currentOperation;
     
     public void executeAction(int action, Token token) throws SemanticError {
@@ -53,24 +56,26 @@ public class Semantico implements Constants {
                 setCurrentOperation(token);
                 break;
             case 50:
-                // Sum and Subtract
+                // Left Shift
                 action50(token);
                 break;
             case 51:
-                // Multiplication and Division
+                // Right Shift
                 action51(token);
                 break;
-            case 52:
-                // Negative
-                action52(token);
-                break;
             case 60:
-                // INTEGER value found
                 action60(token);
                 break;
-            case 61:
+            case 62:
+                // Negative
+                break;
+            case 70:
+                // INTEGER value found
+                action70(token);
+                break;
+            case 71:
                 // DOUBLE value found
-                action61(token);
+                action71(token);
                 break;
             case 100:
                 // Var being Used
@@ -83,6 +88,25 @@ public class Semantico implements Constants {
     private void showLog(Token currentToken) {
         System.out.print(currentToken.getLexeme());
         System.out.println(PrimecIDE.symbolTable.toString());
+    }
+    
+    private void modifyScope() {
+        PrimecIDE.scopeStack.push(PrimecIDE.scopeStack.pop() + PrimecIDE.getNextScopeSerial());
+    }
+
+    private void addSymbol(Symbol symbol) throws SemanticError {
+        PrimecIDE.symbolTable.add(symbol);
+        currentSymbol = null;
+    }
+    
+    private void pushScope(Token token) {
+        System.out.println("Escopo alterado de \"" + PrimecIDE.scopeStack.lastElement() + "\" para \"" + token.getLexeme() + "\"");
+        PrimecIDE.scopeStack.push(token.getLexeme());
+    }
+
+    private void popScope(Token token) {
+        String value = PrimecIDE.scopeStack.pop();
+        System.out.println("Escopo alterado de \"" + value + "\" para \"" + PrimecIDE.scopeStack.lastElement() + "\"");
     }
     
     private void action1(Token token) {
@@ -123,16 +147,6 @@ public class Semantico implements Constants {
         }
     }
 
-    private void pushScope(Token token) {
-        System.out.println("Escopo alterado de \"" + PrimecIDE.scopeStack.lastElement() + "\" para \"" + token.getLexeme() + "\"");
-        PrimecIDE.scopeStack.push(token.getLexeme());
-    }
-
-    private void popScope(Token token) {
-        String value = PrimecIDE.scopeStack.pop();
-        System.out.println("Escopo alterado de \"" + value + "\" para \"" + PrimecIDE.scopeStack.lastElement() + "\"");
-    }
-
     private void action20(Token token) throws SemanticError {
         modifyScope();
         action2(token);
@@ -156,20 +170,13 @@ public class Semantico implements Constants {
     }
 
     private void setCurrentOperation(Token token) {
-        char op = token.getLexeme().charAt(0);
-        switch (op) {
-            case '+':
-                currentOperation = Operation.OP_MAIS;
-                break;
-            case '-':
-                currentOperation = Operation.OP_MENOS;
-                break;
-            case '*':
-                currentOperation = Operation.OP_VEZES;
-                break;
-            case '/':
-                currentOperation = Operation.OP_DIVISAO;
-                break;
+        String OP = token.getLexeme();
+        
+        Operation[] operations = Operation.values();
+        for (Operation operation : operations) {
+            if (OP.equals(operation.getDescription())) {
+                currentOperation = operation;
+            }
         }
     }
     
@@ -181,18 +188,18 @@ public class Semantico implements Constants {
         
     }
     
-    public void action52(Token token) {
+    public void action60(Token token) {
         
     }
     
-    public void action60(Token token) {
+    public void action70(Token token) {
         System.out.println("INTEGER value found: " + token.getLexeme());
-        valueStack.push(token.getLexeme());
+        stackingValues.push(token.getLexeme());
     }
     
-    public void action61(Token token) {
+    public void action71(Token token) {
         System.out.println("DOUBLE value found: " + token.getLexeme());
-        valueStack.push(token.getLexeme());
+        stackingValues.push(token.getLexeme());
     }
     
     private void action100(Token token) throws SemanticError {
@@ -205,15 +212,6 @@ public class Semantico implements Constants {
         } else {
             throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" não foi declarada.");
         }
-    }
-
-    private void modifyScope() {
-        PrimecIDE.scopeStack.push(PrimecIDE.scopeStack.pop() + PrimecIDE.getNextScopeSerial());
-    }
-
-    private void addSymbol(Symbol symbol) throws SemanticError {
-        PrimecIDE.symbolTable.add(symbol);
-        currentSymbol = null;
     }
 
 }

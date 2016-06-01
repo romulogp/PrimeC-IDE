@@ -1,4 +1,4 @@
-package br.com.primec.core;
+package br.com.primec.core.exception;
 
 public class AnalysisError extends Exception {
 

@@ -1,13 +1,13 @@
 package br.com.primec.gui;
 
-import br.com.primec.core.LexicalError;
+import br.com.primec.core.exception.LexicalError;
 import br.com.primec.core.Lexico;
-import br.com.primec.core.Scope;
-import br.com.primec.core.SemanticError;
+import br.com.primec.core.table.Scope;
+import br.com.primec.core.exception.SemanticError;
 import br.com.primec.core.Semantico;
 import br.com.primec.core.Sintatico;
-import br.com.primec.core.SymbolTable;
-import br.com.primec.core.SyntaticError;
+import br.com.primec.core.table.SymbolTable;
+import br.com.primec.core.exception.SyntaticError;
 import java.util.Stack;
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
