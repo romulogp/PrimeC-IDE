@@ -12,7 +12,8 @@ public class Symbol {
     private boolean vect;
     private boolean matrix;
     private boolean function;
-
+    private double value;
+    
     public Symbol() {
         this.initialized = false;
         this.used = false;
@@ -102,4 +103,12 @@ public class Symbol {
         this.function = function;
     }
 
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
+    }
+    
 }

@@ -17,7 +17,7 @@ public class SymbolTable {
         return symbols;
     }
 
-    public Symbol find(Symbol symbol) {
+    public Symbol findBySymbolScope(Symbol symbol) {
         for (Symbol s : symbols) {
             if ((s.getName().equals(symbol.getName()))
                     && (s.getScope().equals(symbol.getScope()))) {
@@ -45,7 +45,7 @@ public class SymbolTable {
             tempSymbol.setName(symbol.getName());
             tempSymbol.setScope(tempStack.lastElement());
 
-            if ((tempSymbol = find(tempSymbol)) != null) {
+            if ((tempSymbol = findBySymbolScope(tempSymbol)) != null) {
                 return tempSymbol;
             }
             tempStack.pop();
@@ -54,7 +54,7 @@ public class SymbolTable {
     }
 
     public void add(Symbol symbol) throws SemanticError {
-        if (find(symbol) == null) {
+        if (findBySymbolScope(symbol) == null) {
             symbols.add(symbol);
         } else {
             throw new SemanticError("Duplicated Symbol");

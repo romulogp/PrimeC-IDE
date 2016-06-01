@@ -9,7 +9,7 @@ import java.util.Stack;
 public class Semantico implements Constants {
 
     private Symbol currentSymbol;
-    private final Stack<String> stackingValues = new Stack<>();
+    private final Stack<String> values = new Stack<>();
     private Operation currentOperation;
     private Token currentToken;
     
@@ -18,19 +18,19 @@ public class Semantico implements Constants {
         switch (action) {
             case 1:
                 // Var Type Detection
-                action1();
+                detectVarType();
                 break;
             case 2:
                 // Var Declaration
-                action2();
+                varDeclaration();
                 break;
             case 3:
                 // Function Declaration
-                action3();
+                functionDeclaration();
                 break;
             case 4:
                 // Vector Declaration
-                action4();
+                vectorDeclaration();
                 break;
             case 9:
                 // Push Scope
@@ -42,7 +42,7 @@ public class Semantico implements Constants {
                 break;
             case 20:
                 // Scope Change due to multiple ID's control
-                action20();
+                changeScope();
                 break;
             case 24:
                 // Function Parameters Declaration
@@ -50,7 +50,7 @@ public class Semantico implements Constants {
                 break;
             case 45:
                 // Var Initialization
-                action45();
+                initializeVar();
                 break;
             case 49:
                 // Current Operation
@@ -58,30 +58,30 @@ public class Semantico implements Constants {
                 break;
             case 50:
                 // Left Shift
-                action50();
+                leftShift();
                 break;
             case 51:
                 // Right Shift
-                action51();
+                rightShift();
                 break;
             case 60:
-                action60();
+                sumOrSubtract();
                 break;
             case 62:
                 // Negative
-                action62();
+                negativeNumber();
                 break;
             case 70:
                 // INTEGER value found
-                action70();
+                pushIntegerValue();
                 break;
             case 71:
                 // DOUBLE value found
-                action71();
+                pushDoubleValue();
                 break;
             case 100:
                 // Var being Used
-                action100();
+                setCurrentSymbolBeingUsed();
                 break;
         }
         showLog();
@@ -111,12 +111,12 @@ public class Semantico implements Constants {
         System.out.println("Escopo alterado de \"" + value + "\" para \"" + PrimecIDE.scopeStack.lastElement() + "\"");
     }
     
-    private void action1() {
+    private void detectVarType() {
         currentSymbol = new Symbol();
         currentSymbol.setType(currentToken.getLexeme());
     }
 
-    private void action2() throws SemanticError {
+    private void varDeclaration() throws SemanticError {
         currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         try {
@@ -126,7 +126,7 @@ public class Semantico implements Constants {
         }
     }
 
-    private void action3() throws SemanticError {
+    private void functionDeclaration() throws SemanticError {
         currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setFunction(true);
@@ -138,7 +138,7 @@ public class Semantico implements Constants {
         pushScope();
     }
 
-    private void action4() throws SemanticError {
+    private void vectorDeclaration() throws SemanticError {
         currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setVect(true);
@@ -149,9 +149,9 @@ public class Semantico implements Constants {
         }
     }
 
-    private void action20() throws SemanticError {
+    private void changeScope() throws SemanticError {
         modifyScope();
-        action2();
+        varDeclaration();
     }
 
     private void action24() throws SemanticError {
@@ -165,7 +165,7 @@ public class Semantico implements Constants {
         }
     }
 
-    private void action45() {
+    private void initializeVar() {
         currentSymbol = new Symbol();
         currentSymbol.setName(currentToken.getLexeme());
         PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack).setInitialized(true);
@@ -174,45 +174,65 @@ public class Semantico implements Constants {
     private void setCurrentOperation() {
         String OP = currentToken.getLexeme();
         
-        Operation[] operations = Operation.values();
-        for (Operation operation : operations) {
+        for (Operation operation : Operation.values()) {
             if (OP.equals(operation.getDescription())) {
                 currentOperation = operation;
             }
         }
     }
     
-    public void action50() {
+    public void leftShift() {
+        // Left Shift
+    }
+    
+    public void rightShift() {
+        // Right Shift
+    }
+    
+    public void sumOrSubtract() {
+        double value1 = obtainValue(values.lastElement(), PrimecIDE.scopeStack.lastElement());
+        double value2 = obtainValue(values.lastElement(), PrimecIDE.scopeStack.lastElement());
         
+        if (currentOperation == Operation.SUM) {
+            PrimecIDE.scopeStack.push(String.valueOf(value1 + value2));
+        } else if (currentOperation == Operation.SUBTRACT) {
+            PrimecIDE.scopeStack.push(String.valueOf(value1 - value2));
+        }
     }
     
-    public void action51() {
-        
+    public double obtainValue(String name, String scope) {
+        Symbol tempSymbol;
+        if ((tempSymbol = buildSymbol(name, scope)) != null) {
+            values.pop();
+            return tempSymbol.getValue();
+        } else {
+            return Double.parseDouble(values.pop());
+        }
     }
     
-    public void action60() {
-        
-    }
-    
-    public void action62() {
-        
-    }
-    
-    public void action70() {
-        System.out.println("INTEGER value found: " + currentToken.getLexeme());
-        stackingValues.push(currentToken.getLexeme());
-    }
-    
-    public void action71() {
-        System.out.println("DOUBLE value found: " + currentToken.getLexeme());
-        stackingValues.push(currentToken.getLexeme());
-    }
-    
-    private void action100() throws SemanticError {
+    public Symbol buildSymbol(String name, String scope) {
         currentSymbol = new Symbol();
-        currentSymbol.setName(currentToken.getLexeme());
-        currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
-        Symbol symbolToSet = PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack);
+        currentSymbol.setName(name);
+        currentSymbol.setScope(scope);
+        return PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack);
+    }
+    
+    public void negativeNumber() {
+        
+    }
+    
+    public void pushIntegerValue() {
+        System.out.println("INTEGER value found: " + currentToken.getLexeme());
+        values.push(currentToken.getLexeme());
+    }
+    
+    public void pushDoubleValue() {
+        System.out.println("DOUBLE value found: " + currentToken.getLexeme());
+        values.push(currentToken.getLexeme());
+    }
+    
+    private void setCurrentSymbolBeingUsed() throws SemanticError {
+        Symbol symbolToSet = buildSymbol(currentToken.getLexeme(), PrimecIDE.scopeStack.lastElement());
         if (symbolToSet != null) {
             symbolToSet.setUsed(true);
         } else {
