@@ -228,6 +228,8 @@ OUTPUT     = ID : "output"
 
 <op_factor>	::= OP_VEZES | OP_DIVISAO ;
 
-<input>		::= INPUT "(" <v_val> "," ID #100 ")"
-		  | INPUT "(" <v_val> "," ID #100 "[" <expression> "]" ")" ;
-<output>	::= OUTPUT "(" <expression> ")" ;
+<input>		::= INPUT "(" ID #100 ")"
+		  | INPUT "(" ID #100 "[" <expression> "]" ")" ;
+
+<output>	::= OUTPUT "(" <expression> ")"
+		  | OUTPUT "(" ID #100 "[" <expression> "]" ")" ;
