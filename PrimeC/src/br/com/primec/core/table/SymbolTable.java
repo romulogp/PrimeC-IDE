@@ -73,7 +73,7 @@ public class SymbolTable {
         for (Symbol s : symbols) {
             if (!s.isFunction() && !s.isParam()
                     && !s.isUsed()) {
-                return "A variável \"" + s.getName() + "\" não é utilizada.";
+                return "A variável \"" + s.getName() + "\" não é utilizada.\n";
             }
         }
         return "";
@@ -83,7 +83,7 @@ public class SymbolTable {
         for (Symbol s : symbols) {
             if (!s.isFunction() && !s.isParam()
                     && s.isUsed() && !s.isInitialized()) {
-                return "A variável \"" + s.getName() + "\" não foi inicializada.";
+                return "A variável \"" + s.getName() + "\" não foi inicializada.\n";
             }
         }
         return "";

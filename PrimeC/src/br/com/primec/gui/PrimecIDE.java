@@ -255,8 +255,8 @@ public class PrimecIDE extends javax.swing.JFrame {
         lexico.setInput(jTextAreaCode.getText());
         try {
             sintatico.parse(lexico, semantico);
-            jTextAreaConsole.setText(jTextAreaConsole.getText() + "\n" + symbolTable.checkDeclaredNotUsed());
-            jTextAreaConsole.setText(jTextAreaConsole.getText() + "\n" + symbolTable.checkUsedNotInitialized());
+            jTextAreaConsole.setText(jTextAreaConsole.getText() + symbolTable.checkDeclaredNotUsed());
+            jTextAreaConsole.setText(jTextAreaConsole.getText() + symbolTable.checkUsedNotInitialized());
             jTextAreaConsole.setText(jTextAreaConsole.getText() + "\n\n" + "CONSTRUÍDO COM SUCESSO...");
             containError = false;
         } catch (LexicalError e) {
