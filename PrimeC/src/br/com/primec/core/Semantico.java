@@ -1,43 +1,50 @@
 package br.com.primec.core;
 
+import br.com.primec.core.code.container.AssemblyCodeContainer;
 import br.com.primec.core.table.Operation;
 import br.com.primec.core.table.Symbol;
 import br.com.primec.core.exception.SemanticError;
+import br.com.primec.core.code.generator.AssemblyCodeGenerator;
 import br.com.primec.gui.PrimecIDE;
-import java.util.Stack;
 
 public class Semantico implements Constants {
 
-    private Symbol currentSymbol;
-    private final Stack<String> values = new Stack<>();
-    private Operation currentOperation;
+//    private final Stack<String> values = new Stack<>();
     private Token currentToken;
+    private Symbol currentSymbol;
+    private Operation ioOperation;
+    private Operation currentOperation;
+    
+    public Semantico() {
+        init();
+    }
+    
+    public final void init() {
+        this.ioOperation = null;
+        this.currentToken = null;
+        this.currentSymbol = null;
+        this.currentOperation = null;
+    }
     
     public void executeAction(int action, Token currentToken) throws SemanticError {
         this.currentToken = currentToken;
         switch (action) {
             case 1:
-                // Var Type Detection
                 detectVarType();
                 break;
             case 2:
-                // Var Declaration
                 varDeclaration();
                 break;
             case 3:
-                // Function Declaration
                 functionDeclaration();
                 break;
             case 4:
-                // Vector Declaration
                 vectorDeclaration();
                 break;
             case 9:
-                // Push Scope
                 pushScope();
                 break;
             case 10:
-                // Pop Scope
                 popScope();
                 break;
             case 20:
@@ -45,46 +52,49 @@ public class Semantico implements Constants {
                 changeScope();
                 break;
             case 24:
-                // Function Parameters Declaration
-                action24();
+                functionParameteresDeclaration();
+                break;
+            case 29:
+                openCloseInputOperation();
+                break;
+            case 30:
+                openCloseOutputOperation();
+                break;
+            case 31:
+                generateInput();
+                break;
+            case 32:
+                generateOutputID();
                 break;
             case 45:
-                // Var Initialization
                 initializeVar();
                 break;
             case 49:
-                // Current Operation
                 setCurrentOperation();
                 break;
             case 50:
-                // Left Shift
                 leftShift();
                 break;
             case 51:
-                // Right Shift
                 rightShift();
                 break;
             case 60:
-                sumOrSubtract();
+//                sumOrSubtract();
                 break;
             case 62:
-                // Negative
                 negativeNumber();
                 break;
             case 70:
-                // INTEGER value found
-                pushIntegerValue();
+                integerValue();
                 break;
             case 71:
-                // DOUBLE value found
-                pushDoubleValue();
+                doubleValue();
                 break;
             case 100:
-                // Var being Used
                 setCurrentSymbolBeingUsed();
                 break;
         }
-        showLog();
+//         showLog();
     }
 
     private void showLog() {
@@ -154,7 +164,7 @@ public class Semantico implements Constants {
         varDeclaration();
     }
 
-    private void action24() throws SemanticError {
+    private void functionParameteresDeclaration() throws SemanticError {
         currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setParam(true);
@@ -189,26 +199,26 @@ public class Semantico implements Constants {
         // Right Shift
     }
     
-    public void sumOrSubtract() {
-        double value1 = obtainValue(values.lastElement(), PrimecIDE.scopeStack.lastElement());
-        double value2 = obtainValue(values.lastElement(), PrimecIDE.scopeStack.lastElement());
-        
-        if (currentOperation == Operation.SUM) {
-            PrimecIDE.scopeStack.push(String.valueOf(value1 + value2));
-        } else if (currentOperation == Operation.SUBTRACT) {
-            PrimecIDE.scopeStack.push(String.valueOf(value1 - value2));
-        }
-    }
+//    public void sumOrSubtract() {
+//        double value1 = obtainValue(values.lastElement(), PrimecIDE.scopeStack.lastElement());
+//        double value2 = obtainValue(values.lastElement(), PrimecIDE.scopeStack.lastElement());
+//        
+//        if (currentOperation == Operation.SUM) {
+//            PrimecIDE.scopeStack.push(String.valueOf(value1 + value2));
+//        } else if (currentOperation == Operation.SUBTRACT) {
+//            PrimecIDE.scopeStack.push(String.valueOf(value1 - value2));
+//        }
+//    }
     
-    public double obtainValue(String name, String scope) {
-        Symbol tempSymbol;
-        if ((tempSymbol = buildSymbol(name, scope)) != null) {
-            values.pop();
-            return tempSymbol.getValue();
-        } else {
-            return Double.parseDouble(values.pop());
-        }
-    }
+//    public double obtainValue(String name, String scope) {
+//        Symbol tempSymbol;
+//        if ((tempSymbol = buildSymbol(name, scope)) != null) {
+//            values.pop();
+//            return tempSymbol.getValue();
+//        } else {
+//            return Double.parseDouble(values.pop());
+//        }
+//    }
     
     public Symbol buildSymbol(String name, String scope) {
         currentSymbol = new Symbol();
@@ -221,14 +231,16 @@ public class Semantico implements Constants {
         
     }
     
-    public void pushIntegerValue() {
+    public void integerValue() {
         System.out.println("INTEGER value found: " + currentToken.getLexeme());
-        values.push(currentToken.getLexeme());
+        generateOutputValue();
+//        values.push(currentToken.getLexeme());
     }
     
-    public void pushDoubleValue() {
+    public void doubleValue() {
         System.out.println("DOUBLE value found: " + currentToken.getLexeme());
-        values.push(currentToken.getLexeme());
+        generateOutputValue();
+//        values.push(currentToken.getLexeme());
     }
     
     private void setCurrentSymbolBeingUsed() throws SemanticError {
@@ -239,5 +251,42 @@ public class Semantico implements Constants {
             throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" não foi declarada.");
         }
     }
-
+    
+    private void generateInput() {
+        if (ioOperation == Operation.INPUT) {
+            PrimecIDE.asmCodeCon.addText(
+                    PrimecIDE.asmCodeGen.input(currentToken.getLexeme()));
+        }
+    }
+    
+    private void generateOutputID() {
+        if (ioOperation == Operation.OUTPUT) {
+            PrimecIDE.asmCodeCon.addText(
+                    PrimecIDE.asmCodeGen.outputId(currentToken.getLexeme()));
+        }
+    }
+    
+    private void generateOutputValue() {
+        if (ioOperation == Operation.OUTPUT) {
+            PrimecIDE.asmCodeCon.addText(
+                    PrimecIDE.asmCodeGen.outputValue(currentToken.getLexeme()));
+        }
+    }
+    
+    private void openCloseInputOperation() {
+        if (ioOperation == null) {
+            this.ioOperation = Operation.INPUT;
+        } else {
+            this.ioOperation = null;
+        }
+    }
+    
+    private void openCloseOutputOperation() {
+        if (ioOperation == null) {
+            this.ioOperation = Operation.OUTPUT;
+        } else {
+            this.ioOperation = null;
+        }
+    }
+    
 }

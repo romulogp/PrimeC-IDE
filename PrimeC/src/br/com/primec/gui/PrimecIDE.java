@@ -6,6 +6,8 @@ import br.com.primec.core.table.Scope;
 import br.com.primec.core.exception.SemanticError;
 import br.com.primec.core.Semantico;
 import br.com.primec.core.Sintatico;
+import br.com.primec.core.code.container.AssemblyCodeContainer;
+import br.com.primec.core.code.generator.AssemblyCodeGenerator;
 import br.com.primec.core.table.SymbolTable;
 import br.com.primec.core.exception.SyntaticError;
 import java.util.Stack;
@@ -24,6 +26,8 @@ public class PrimecIDE extends javax.swing.JFrame {
     public boolean containError = true;
     private static int scopeSerialId;
     private boolean modified = false;
+    public static AssemblyCodeGenerator asmCodeGen;
+    public static AssemblyCodeContainer asmCodeCon;
     
     public PrimecIDE() {
         initComponents();
@@ -37,12 +41,14 @@ public class PrimecIDE extends javax.swing.JFrame {
         lexico = new Lexico();
         sintatico = new Sintatico();
         semantico = new Semantico();
-        initSemanticComponents();
+        initComponentes();
         jTextAreaCode.setTabSize(2);
         jTextAreaCode.requestFocus();
     }
 
-    private void initSemanticComponents() {
+    private void initComponentes() {
+        asmCodeGen = new AssemblyCodeGenerator();
+        asmCodeCon = new AssemblyCodeContainer();
         scopeStack = new Stack();
         scopeStack.push(Scope.GLOBAL.getDescription());
         symbolTable = new SymbolTable();
@@ -68,6 +74,7 @@ public class PrimecIDE extends javax.swing.JFrame {
         jButtonNew = new javax.swing.JButton();
         jButtonSave = new javax.swing.JButton();
         jButtonViewSymbolTable = new javax.swing.JButton();
+        jButtonViewSymbolTable1 = new javax.swing.JButton();
         jPanelContent = new javax.swing.JPanel();
         jTabbedPaneConsole = new javax.swing.JTabbedPane();
         jScrollPaneConsole = new javax.swing.JScrollPane();
@@ -131,6 +138,16 @@ public class PrimecIDE extends javax.swing.JFrame {
             }
         });
 
+        jButtonViewSymbolTable1.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
+        jButtonViewSymbolTable1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/primec/resources/icons/asm-32.png"))); // NOI18N
+        jButtonViewSymbolTable1.setToolTipText("Tabela de Símbolos");
+        jButtonViewSymbolTable1.setFocusable(false);
+        jButtonViewSymbolTable1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonViewSymbolTable1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelToolsLayout = new javax.swing.GroupLayout(jPanelTools);
         jPanelTools.setLayout(jPanelToolsLayout);
         jPanelToolsLayout.setHorizontalGroup(
@@ -146,25 +163,28 @@ public class PrimecIDE extends javax.swing.JFrame {
                 .addComponent(jButtonExecute, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(jButtonViewSymbolTable, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(jButtonViewSymbolTable1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanelToolsLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButtonExecute, jButtonNew, jButtonOpen, jButtonSave, jButtonViewSymbolTable});
+        jPanelToolsLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButtonExecute, jButtonNew, jButtonOpen, jButtonSave, jButtonViewSymbolTable, jButtonViewSymbolTable1});
 
         jPanelToolsLayout.setVerticalGroup(
             jPanelToolsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelToolsLayout.createSequentialGroup()
                 .addGap(2, 2, 2)
                 .addGroup(jPanelToolsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonViewSymbolTable1, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonViewSymbolTable, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonSave, javax.swing.GroupLayout.DEFAULT_SIZE, 52, Short.MAX_VALUE)
                     .addComponent(jButtonNew, javax.swing.GroupLayout.DEFAULT_SIZE, 52, Short.MAX_VALUE)
                     .addComponent(jButtonExecute, javax.swing.GroupLayout.DEFAULT_SIZE, 52, Short.MAX_VALUE)
                     .addComponent(jButtonOpen, javax.swing.GroupLayout.DEFAULT_SIZE, 52, Short.MAX_VALUE))
-                .addGap(2, 2, 2))
+                .addGap(3, 3, 3))
         );
 
-        jPanelToolsLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonExecute, jButtonNew, jButtonOpen, jButtonSave, jButtonViewSymbolTable});
+        jPanelToolsLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonExecute, jButtonNew, jButtonOpen, jButtonSave, jButtonViewSymbolTable, jButtonViewSymbolTable1});
 
         jTabbedPaneConsole.setFont(new java.awt.Font("Courier New", 0, 11)); // NOI18N
 
@@ -205,7 +225,7 @@ public class PrimecIDE extends javax.swing.JFrame {
         jPanelContentLayout.setVerticalGroup(
             jPanelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelContentLayout.createSequentialGroup()
-                .addComponent(jTabbedPaneCode, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
+                .addComponent(jTabbedPaneCode, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
                 .addGap(0, 0, 0)
                 .addComponent(jTabbedPaneConsole, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5))
@@ -230,7 +250,7 @@ public class PrimecIDE extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonExecuteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExecuteActionPerformed
-        initSemanticComponents();
+        initComponentes();
         jTextAreaConsole.setText("");
         lexico.setInput(jTextAreaCode.getText());
         try {
@@ -288,6 +308,10 @@ public class PrimecIDE extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButtonViewSymbolTableActionPerformed
 
+    private void jButtonViewSymbolTable1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewSymbolTable1ActionPerformed
+        System.out.println(asmCodeCon.build());
+    }//GEN-LAST:event_jButtonViewSymbolTable1ActionPerformed
+
     public static void loadWindow() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -316,6 +340,7 @@ public class PrimecIDE extends javax.swing.JFrame {
     private javax.swing.JButton jButtonOpen;
     private javax.swing.JButton jButtonSave;
     private javax.swing.JButton jButtonViewSymbolTable;
+    private javax.swing.JButton jButtonViewSymbolTable1;
     private javax.swing.JPanel jPanelContent;
     private javax.swing.JPanel jPanelTools;
     private javax.swing.JScrollPane jScrollPaneCode;

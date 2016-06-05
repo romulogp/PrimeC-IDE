@@ -20,8 +20,10 @@ public enum Operation {
     OP_BWS_NOT("~"),
     OP_OR("||"),
     OP_AND("&&"),
-    OP_NOT("!");
-
+    OP_NOT("!"),
+    INPUT("input"),
+    OUTPUT("output");
+    
     private final String description;
 
     private Operation(String description) {
