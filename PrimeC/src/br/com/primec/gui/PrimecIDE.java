@@ -201,7 +201,7 @@ public class PrimecIDE extends javax.swing.JFrame {
         jTextAreaCode.setFont(new java.awt.Font("Courier New", 0, 13)); // NOI18N
         jTextAreaCode.setRows(5);
         jTextAreaCode.setTabSize(2);
-        jTextAreaCode.setText("int teste(int um, str doi2) {\n\tint batata = 10;\n}\n\nvoid main () {\n\tfor (int i = 0; i < 10; i++) {\n\t\tint teste = 10;\n\t\tfor (int j = 0; j < 10; j++) {\n\t\t\tint teste = 10;\n\t\t}\n\t}\n\n\twhile (a == 10) {\n\t\twhile (a == 10) {\n\t\t\tint meuInt = 10;\n\t\t}\n\t}\n\n\tdo {\n\t\tinput(10, a);\n\t\toutput(a);\n\t} while (a == 10);\n\t\n\tint batata = teste(10, \"dois\");\n\tint[10] meu_vetor;\n\n\tif (a == 10) {\n\t\ta = -(10 * a);\n\t} else {\n\t\tint[10] a;\n\t}\n\n}");
+        jTextAreaCode.setText("void main () {\n\tint a;\n\n\tinput(a);\n\toutput(a);\n}");
         jTextAreaCode.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 jTextAreaCodeKeyTyped(evt);

@@ -270,7 +270,7 @@
                     </Property>
                     <Property name="rows" type="int" value="5"/>
                     <Property name="tabSize" type="int" value="2"/>
-                    <Property name="text" type="java.lang.String" value="int teste(int um, str doi2) {&#xa;&#x9;int batata = 10;&#xa;}&#xa;&#xa;void main () {&#xa;&#x9;for (int i = 0; i &lt; 10; i++) {&#xa;&#x9;&#x9;int teste = 10;&#xa;&#x9;&#x9;for (int j = 0; j &lt; 10; j++) {&#xa;&#x9;&#x9;&#x9;int teste = 10;&#xa;&#x9;&#x9;}&#xa;&#x9;}&#xa;&#xa;&#x9;while (a == 10) {&#xa;&#x9;&#x9;while (a == 10) {&#xa;&#x9;&#x9;&#x9;int meuInt = 10;&#xa;&#x9;&#x9;}&#xa;&#x9;}&#xa;&#xa;&#x9;do {&#xa;&#x9;&#x9;input(10, a);&#xa;&#x9;&#x9;output(a);&#xa;&#x9;} while (a == 10);&#xa;&#x9;&#xa;&#x9;int batata = teste(10, &quot;dois&quot;);&#xa;&#x9;int[10] meu_vetor;&#xa;&#xa;&#x9;if (a == 10) {&#xa;&#x9;&#x9;a = -(10 * a);&#xa;&#x9;} else {&#xa;&#x9;&#x9;int[10] a;&#xa;&#x9;}&#xa;&#xa;}"/>
+                    <Property name="text" type="java.lang.String" value="void main () {&#xa;&#x9;int a;&#xa;&#xa;&#x9;input(a);&#xa;&#x9;output(a);&#xa;}"/>
                   </Properties>
                   <Events>
                     <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="jTextAreaCodeKeyTyped"/>
