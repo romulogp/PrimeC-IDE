@@ -153,7 +153,7 @@ OUTPUT     = ID : "output"
 
 <cmd>       	::= CONST <v_dec> ";"
 		  | <v_dec> ";" 
-		  | <attrib> ";"
+		  | <attrib> #34 ";"
 		  | <for>
 		  | <while>
 		  | <do_while> ";"
