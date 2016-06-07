@@ -7,14 +7,16 @@ import br.com.primec.gui.PrimecIDE;
 
 public class Semantico implements Constants {
 
+    private String stoId;
     private int vectorSize;
     private Symbol ldSymbol;
     private Token currentToken;
     private Symbol currentSymbol;
     private Operation ioOperation;
+    private boolean firstExpression;
     private Operation vectorOperation;
     private Operation currentOperation;
-    private boolean firstAritmOperation;
+    
     public Semantico() {
         init();
     }
@@ -26,7 +28,7 @@ public class Semantico implements Constants {
         this.currentSymbol = null;
         this.vectorOperation = null;
         this.currentOperation = null;
-        this.firstAritmOperation = false;
+        this.firstExpression = false;
     }
     
     public void executeAction(int action, Token currentToken) throws SemanticError {
@@ -62,7 +64,7 @@ public class Semantico implements Constants {
         System.out.print(currentToken.getLexeme());
         System.out.println(PrimecIDE.symbolTable.toString());
     }
-    
+
     private void modifyScope() {
         PrimecIDE.scopeStack.push(PrimecIDE.scopeStack.pop() + PrimecIDE.getNextScopeSerial());
     }
@@ -125,7 +127,12 @@ public class Semantico implements Constants {
     }
 
     private void attribution() {
-        
+        firstExpression = true;
+        storeId();
+    }
+    
+    private void storeId() {
+        this.stoId = currentSymbol.getName();
     }
     
     private void forScopeChange() throws SemanticError {
