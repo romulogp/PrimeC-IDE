@@ -22,7 +22,8 @@ public enum Operation {
     OP_AND("&&"),
     OP_NOT("!"),
     INPUT("input"),
-    OUTPUT("output");
+    OUTPUT("output"),
+    VECTOR("vector");
     
     private final String description;
 

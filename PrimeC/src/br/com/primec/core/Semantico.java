@@ -1,98 +1,59 @@
 package br.com.primec.core;
 
-import br.com.primec.core.code.container.AssemblyCodeContainer;
 import br.com.primec.core.table.Operation;
 import br.com.primec.core.table.Symbol;
 import br.com.primec.core.exception.SemanticError;
-import br.com.primec.core.code.generator.AssemblyCodeGenerator;
 import br.com.primec.gui.PrimecIDE;
 
 public class Semantico implements Constants {
 
-//    private final Stack<String> values = new Stack<>();
+    private int vectorSize;
+    private Symbol ldSymbol;
     private Token currentToken;
     private Symbol currentSymbol;
     private Operation ioOperation;
+    private Operation vectorOperation;
     private Operation currentOperation;
-    
+    private boolean firstAritmOperation;
     public Semantico() {
         init();
     }
     
     public final void init() {
+        this.vectorSize = 0;
         this.ioOperation = null;
         this.currentToken = null;
         this.currentSymbol = null;
+        this.vectorOperation = null;
         this.currentOperation = null;
+        this.firstAritmOperation = false;
     }
     
     public void executeAction(int action, Token currentToken) throws SemanticError {
         this.currentToken = currentToken;
         switch (action) {
-            case 1:
-                detectVarType();
-                break;
-            case 2:
-                varDeclaration();
-                break;
-            case 3:
-                functionDeclaration();
-                break;
-            case 4:
-                vectorDeclaration();
-                break;
-            case 9:
-                pushScope();
-                break;
-            case 10:
-                popScope();
-                break;
-            case 20:
-                // Scope Change due to multiple ID's control
-                changeScope();
-                break;
-            case 24:
-                functionParameteresDeclaration();
-                break;
-            case 29:
-                openCloseInputOperation();
-                break;
-            case 30:
-                openCloseOutputOperation();
-                break;
-            case 31:
-                generateInput();
-                break;
-            case 32:
-                generateOutputID();
-                break;
-            case 45:
-                initializeVar();
-                break;
-            case 49:
-                setCurrentOperation();
-                break;
-            case 50:
-                leftShift();
-                break;
-            case 51:
-                rightShift();
-                break;
-            case 60:
-//                sumOrSubtract();
-                break;
-            case 62:
-                negativeNumber();
-                break;
-            case 70:
-                integerValue();
-                break;
-            case 71:
-                doubleValue();
-                break;
-            case 100:
-                setCurrentSymbolBeingUsed();
-                break;
+            case 1: detectVarType(); break;
+            case 2: varDeclaration(); break;
+            case 3: functionDeclaration(); break;
+            case 4: vectorDeclaration(); break;
+            case 9: pushScope(); break;
+            case 10: popScope(); break;
+            case 20: forScopeChange(); break;
+            case 24: functionParameteresDeclaration(); break;
+            case 29: openCloseInputOperation(); break;
+            case 30: openCloseOutputOperation(); break;
+            case 31: generateInput(); break;
+            case 32: generateOutputID(); break;
+            case 33: attribution(); break;
+            case 45: initializeVar(); break;
+            case 49: setCurrentOperation(); break;
+            case 50: leftShift(); break;
+            case 51: rightShift(); break;
+            case 60: /* sumOrSubtract(); */ break;
+            case 62: negativeNumber(); break;
+            case 70: integerValue(); break;
+            case 71: doubleValue(); break;
+            case 100: setCurrentSymbolBeingUsed(); break;
         }
 //         showLog();
     }
@@ -108,7 +69,6 @@ public class Semantico implements Constants {
 
     private void addSymbol(Symbol symbol) throws SemanticError {
         PrimecIDE.symbolTable.add(symbol);
-        currentSymbol = null;
     }
     
     private void pushScope() {
@@ -131,6 +91,10 @@ public class Semantico implements Constants {
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         try {
             addSymbol(currentSymbol);
+            PrimecIDE.asmCodeCon.addData(
+                    PrimecIDE.asmCodeGen.var(currentSymbol.getName()));
+            ldSymbol = currentSymbol;
+//            currentSymbol = null;
         } catch (SemanticError se) {
             throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
         }
@@ -149,6 +113,7 @@ public class Semantico implements Constants {
     }
 
     private void vectorDeclaration() throws SemanticError {
+        vectorOperation = Operation.VECTOR;
         currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
         currentSymbol.setVect(true);
@@ -159,7 +124,11 @@ public class Semantico implements Constants {
         }
     }
 
-    private void changeScope() throws SemanticError {
+    private void attribution() {
+        
+    }
+    
+    private void forScopeChange() throws SemanticError {
         modifyScope();
         varDeclaration();
     }
@@ -233,8 +202,14 @@ public class Semantico implements Constants {
     
     public void integerValue() {
         System.out.println("INTEGER value found: " + currentToken.getLexeme());
-        generateOutputValue();
-//        values.push(currentToken.getLexeme());
+        if (vectorOperation == Operation.VECTOR) {
+            vectorSize = Integer.parseInt(currentToken.getLexeme());
+            PrimecIDE.asmCodeCon.addData(
+                    PrimecIDE.asmCodeGen.vector(currentSymbol.getName(), vectorSize));
+            vectorOperation = null;
+        } else {
+            generateOutputValue();
+        }
     }
     
     public void doubleValue() {

@@ -9,7 +9,9 @@
 #24 Variável parâmetro de função
 #29 Abre e fecha Entrada de dados (INPUT)
 #30 Abre e fecha Saída de dados (OUTPUT)
-#31 Entrada de ID
+#31 Gera código ASM Entrada de ID
+#32 Gera código ASM Saída de ID
+#33 Atribuição à uma variável
 #45 Inicialização de variável
 #49 Armazena a Operacao Atual
 #50 Operação Left Shift
