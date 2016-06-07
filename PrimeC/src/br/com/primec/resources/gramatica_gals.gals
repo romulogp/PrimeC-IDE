@@ -164,15 +164,15 @@ OUTPUT     = ID : "output"
 		  | #29 <input> #29 ";"
 		  | #30 <output> ";" ;
 
-<attrib>    	::= <v_dec> #45 "=" <func_call>
-		  | <v_dec> #45 "=" <expression>
-		  | ID #100 "=" <func_call>
-		  | ID #100 "=" <expression> ;
+<attrib>    	::= <v_dec> #45 "=" #33 <func_call>
+		  | <v_dec> #45 "=" #33 <expression>
+		  | ID #100 "=" #33 <func_call>
+		  | ID #100 "=" #33 <expression> ;
 
 <v_dec>     	::= <v_typ> ID #2
-		  | <vect> #4 ;
+		  | <vect> ;
 
-<vect>		::= <v_typ> ID "[" <expression> "]" ;
+<vect>		::= <v_typ> ID #4 "[" <expression> "]" ;
 
 <v_typ>     	::= HEX #1
 		  | BIN #1
