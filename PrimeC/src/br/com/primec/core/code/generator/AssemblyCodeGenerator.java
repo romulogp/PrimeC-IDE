@@ -42,29 +42,34 @@ public class AssemblyCodeGenerator {
         return data;
     }
     
-    public final String add(String id) {
+    public final String ADD(String id) {
         return "\n"
                 + "\tADD " + id;
     }
     
-    public final String addi(String value) {
+    public final String ADDI(String value) {
         return "\n"
                 + "\tADDI " + value;
     }
     
-    public final String ld(String id) {
+    public final String LD(String id) {
         return "\n"
                 + "\tLD " + id;
     }
     
-    public final String ldi(String value) {
+    public final String LDI(String value) {
         return "\n"
-                + "\tLDI" + value;
+                + "\tLDI " + value;
     }
     
-    public final String sto(String id) {
+    public final String STO(String id) {
         return "\n"
                 + "\tSTO " + id;
+    }
+    
+    public final String HLT() {
+        return "\n"
+                + "\tHLT 0";
     }
     
 }

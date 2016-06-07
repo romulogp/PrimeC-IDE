@@ -3,6 +3,7 @@ package br.com.primec.core;
 import br.com.primec.core.table.Operation;
 import br.com.primec.core.table.Symbol;
 import br.com.primec.core.exception.SemanticError;
+import br.com.primec.core.table.Scope;
 import br.com.primec.gui.PrimecIDE;
 
 public class Semantico implements Constants {
@@ -47,6 +48,7 @@ public class Semantico implements Constants {
             case 31: generateInput(); break;
             case 32: generateOutputID(); break;
             case 33: attribution(); break;
+            case 34: endAttribution(); break;
             case 45: initializeVar(); break;
             case 49: setCurrentOperation(); break;
             case 50: leftShift(); break;
@@ -74,13 +76,15 @@ public class Semantico implements Constants {
     }
     
     private void pushScope() {
-        System.out.println("Escopo alterado de \"" + PrimecIDE.scopeStack.lastElement() + "\" para \"" + currentToken.getLexeme() + "\"");
         PrimecIDE.scopeStack.push(currentToken.getLexeme());
     }
 
     private void popScope() {
-        String value = PrimecIDE.scopeStack.pop();
-        System.out.println("Escopo alterado de \"" + value + "\" para \"" + PrimecIDE.scopeStack.lastElement() + "\"");
+        PrimecIDE.scopeStack.pop();
+        if (PrimecIDE.scopeStack.lastElement().equals(Scope.GLOBAL.getDescription())) {
+            PrimecIDE.asmCodeCon.addText(
+                    PrimecIDE.asmCodeGen.HLT());
+        }
     }
     
     private void detectVarType() {
@@ -128,10 +132,17 @@ public class Semantico implements Constants {
 
     private void attribution() {
         firstExpression = true;
-        storeId();
+        // Uma operação sempre inicia como positiva
+        currentOperation = Operation.SUM;
+        storeID();
     }
     
-    private void storeId() {
+    private void endAttribution() {
+        PrimecIDE.asmCodeCon.addText(
+                PrimecIDE.asmCodeGen.STO(stoId));
+    }
+    
+    private void storeID() {
         this.stoId = currentSymbol.getName();
     }
     
@@ -208,14 +219,24 @@ public class Semantico implements Constants {
     }
     
     public void integerValue() {
-        System.out.println("INTEGER value found: " + currentToken.getLexeme());
         if (vectorOperation == Operation.VECTOR) {
             vectorSize = Integer.parseInt(currentToken.getLexeme());
             PrimecIDE.asmCodeCon.addData(
                     PrimecIDE.asmCodeGen.vector(currentSymbol.getName(), vectorSize));
             vectorOperation = null;
-        } else {
+        } else if (ioOperation == Operation.OUTPUT) {
             generateOutputValue();
+        } else if (currentOperation == Operation.SUM) {
+            if (firstExpression) {
+                PrimecIDE.asmCodeCon.addText(
+                        PrimecIDE.asmCodeGen.LDI(currentToken.getLexeme()));
+                firstExpression = false;
+            } else {
+                PrimecIDE.asmCodeCon.addText(
+                        PrimecIDE.asmCodeGen.ADDI(currentToken.getLexeme()));
+            }
+        } else if (currentOperation == Operation.SUBTRACT) {
+            
         }
     }
     
@@ -245,6 +266,17 @@ public class Semantico implements Constants {
         if (ioOperation == Operation.OUTPUT) {
             PrimecIDE.asmCodeCon.addText(
                     PrimecIDE.asmCodeGen.outputId(currentToken.getLexeme()));
+        } else if (currentOperation == Operation.SUM) {
+            if (firstExpression) {
+                PrimecIDE.asmCodeCon.addText(
+                        PrimecIDE.asmCodeGen.LD(currentToken.getLexeme()));
+                firstExpression = false;
+            } else {
+                PrimecIDE.asmCodeCon.addText(
+                        PrimecIDE.asmCodeGen.ADD(currentToken.getLexeme()));
+            }
+        } else if (currentOperation == Operation.SUBTRACT) {
+            
         }
     }
     
