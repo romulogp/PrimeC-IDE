@@ -221,29 +221,33 @@ public class Semantico implements Constants {
     public void integerValue() {
         if (vectorOperation == Operation.VECTOR) {
             vectorSize = Integer.parseInt(currentToken.getLexeme());
-            PrimecIDE.asmCodeCon.addData(
-                    PrimecIDE.asmCodeGen.vector(currentSymbol.getName(), vectorSize));
+            PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.vector(currentSymbol.getName(), vectorSize));
             vectorOperation = null;
         } else if (ioOperation == Operation.OUTPUT) {
             generateOutputValue();
         } else if (currentOperation == Operation.SUM) {
             if (firstExpression) {
-                PrimecIDE.asmCodeCon.addText(
-                        PrimecIDE.asmCodeGen.LDI(currentToken.getLexeme()));
+                loadImmediate(currentToken.getLexeme());
                 firstExpression = false;
             } else {
-                PrimecIDE.asmCodeCon.addText(
-                        PrimecIDE.asmCodeGen.ADDI(currentToken.getLexeme()));
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.ADDI(currentToken.getLexeme()));
             }
         } else if (currentOperation == Operation.SUBTRACT) {
-            
+            if (firstExpression) {
+                loadImmediate(currentToken.getLexeme());
+                firstExpression = false;
+            } else {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUBI(currentToken.getLexeme()));
+            }
         }
     }
     
+    private void loadImmediate(String value) {
+        PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI(value));
+    }
+    
     public void doubleValue() {
-        System.out.println("DOUBLE value found: " + currentToken.getLexeme());
-        generateOutputValue();
-//        values.push(currentToken.getLexeme());
+        integerValue();
     }
     
     private void setCurrentSymbolBeingUsed() throws SemanticError {
@@ -264,26 +268,28 @@ public class Semantico implements Constants {
     
     private void generateOutputID() {
         if (ioOperation == Operation.OUTPUT) {
-            PrimecIDE.asmCodeCon.addText(
-                    PrimecIDE.asmCodeGen.outputId(currentToken.getLexeme()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.outputId(currentToken.getLexeme()));
         } else if (currentOperation == Operation.SUM) {
             if (firstExpression) {
-                PrimecIDE.asmCodeCon.addText(
-                        PrimecIDE.asmCodeGen.LD(currentToken.getLexeme()));
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD(currentToken.getLexeme()));
                 firstExpression = false;
             } else {
-                PrimecIDE.asmCodeCon.addText(
-                        PrimecIDE.asmCodeGen.ADD(currentToken.getLexeme()));
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.ADD(currentToken.getLexeme()));
             }
         } else if (currentOperation == Operation.SUBTRACT) {
-            
+            if (firstExpression) {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI("0"));
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUB(currentToken.getLexeme()));
+                firstExpression = false;
+            } else {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUB(currentToken.getLexeme()));
+            }
         }
     }
     
     private void generateOutputValue() {
         if (ioOperation == Operation.OUTPUT) {
-            PrimecIDE.asmCodeCon.addText(
-                    PrimecIDE.asmCodeGen.outputValue(currentToken.getLexeme()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.outputValue(currentToken.getLexeme()));
         }
     }
     

@@ -52,6 +52,16 @@ public class AssemblyCodeGenerator {
                 + "\tADDI " + value;
     }
     
+    public final String SUB(String id) {
+        return "\n"
+                + "\tSUB " + id;
+    }
+    
+    public final String SUBI(String value) {
+        return "\n"
+                + "\tSUBI " + value;
+    }
+    
     public final String LD(String id) {
         return "\n"
                 + "\tLD " + id;
