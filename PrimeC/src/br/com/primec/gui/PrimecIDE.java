@@ -10,6 +10,8 @@ import br.com.primec.core.code.container.AssemblyCodeContainer;
 import br.com.primec.core.code.generator.AssemblyCodeGenerator;
 import br.com.primec.core.table.SymbolTable;
 import br.com.primec.core.exception.SyntaticError;
+import br.com.primec.util.FileSaveUtil;
+import br.com.primec.util.SystemUtils;
 import java.util.Stack;
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
@@ -309,7 +311,13 @@ public class PrimecIDE extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonViewSymbolTableActionPerformed
 
     private void jButtonViewSymbolTable1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewSymbolTable1ActionPerformed
-        System.out.println(asmCodeCon.build());
+        String content = asmCodeCon.build().replace("\n", "\r\n");
+        System.out.println(content);
+        // Salvar arquivo
+        FileSaveUtil fileSaveUtil = new FileSaveUtil("primec.asm");
+        fileSaveUtil.save(content);
+        // Abrir arquivo
+        SystemUtils.openNotepad(fileSaveUtil.getFileFullPath());
     }//GEN-LAST:event_jButtonViewSymbolTable1ActionPerformed
 
     public static void loadWindow() {
