@@ -8,7 +8,7 @@ SemanticName = Semantico
 Package = br.com.primec.core
 ScannerCaseSensitive = true
 ScannerTable = Compact
-Input = String
+Input = Stream
 Parser = SLR
 #RegularDefinitions
 L        : [A-Za-z]
@@ -169,10 +169,10 @@ OUTPUT     = ID : "output"
 		  | ID #100 "=" #33 <func_call>
 		  | ID #100 "=" #33 <expression> ;
 
-<v_dec>     	::= <v_typ> ID #2
-		  | <vect> ;
+<v_dec>     	::= <v_typ> ID #100 #2
+		  | <v_typ> <vect> ;
 
-<vect>		::= <v_typ> ID #4 "[" <expression> "]" ;
+<vect>		::= ID #100 #4 "[" <expression> "]" ;
 
 <v_typ>     	::= HEX #1
 		  | BIN #1
@@ -220,7 +220,7 @@ OUTPUT     = ID : "output"
 <expression10>	::= <expression10> <op_term> #49 <expression11> #60 | <expression11> ;
 <expression11>	::= <expression11> <op_factor> <expression12> #61 | <expression12> ;
 <expression12>	::= OP_MENOS #49 <expression12> #62 | <expression13> ;
-<expression13>	::= <v_val> | "(" <expression> ")" | ID #100 #32 ;
+<expression13>	::= <v_val> | "(" <expression> ")" | ID #100 #32 | <vect> ;
 
 <op_relational>	::= OP_GT | OP_LT | OP_GTE | OP_LTE | OP_NEQ | OP_EQ ;
 
@@ -229,7 +229,6 @@ OUTPUT     = ID : "output"
 <op_factor>	::= OP_VEZES | OP_DIVISAO ;
 
 <input>		::= INPUT "(" ID #100 #31 ")" 
-		  | INPUT "(" ID #100 "[" <expression> "]" ")" ;
+		  | INPUT "(" <vect> ")" ;
 
-<output>	::= OUTPUT "(" <expression> #30 ")"
-		  | OUTPUT "(" ID #100 "[" <expression> "]" ")" ;
+<output>	::= OUTPUT "(" <expression> #30 ")" ;
