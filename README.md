@@ -1,3 +1,7 @@
+*   Red
+*   Green
+*   Blue
+
 *1 Tipo de variáveis
 *2 Declaração de Variável
 *3 Declaração de Função
