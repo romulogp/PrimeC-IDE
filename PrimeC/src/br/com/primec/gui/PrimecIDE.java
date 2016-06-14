@@ -206,7 +206,7 @@ public class PrimecIDE extends javax.swing.JFrame {
         jTextAreaCode.setFont(new java.awt.Font("Courier New", 0, 13)); // NOI18N
         jTextAreaCode.setRows(5);
         jTextAreaCode.setTabSize(2);
-        jTextAreaCode.setText("void main () {\n\tint a;\n\tint vet1[5];\n\n\ta = vet1[0];\n\n\tinput(a);\n\toutput(a);\n}");
+        jTextAreaCode.setText("void main () {\n\tint a;\n\tint vet1[5];\n\n\ta = vet1[0];\n}");
         jTextAreaCode.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 jTextAreaCodeKeyTyped(evt);
@@ -314,13 +314,16 @@ public class PrimecIDE extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonViewSymbolTableActionPerformed
 
     private void jButtonViewSymbolTable1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewSymbolTable1ActionPerformed
-        String content = asmCodeCon.build().replace("\n", "\r\n");
-        System.out.println(content);
-        // Salvar arquivo
-        FileSaveUtil fileSaveUtil = new FileSaveUtil("primec.asm");
-        fileSaveUtil.save(content);
-        // Abrir arquivo
-        SystemUtils.openNotepad(fileSaveUtil.getFileFullPath());
+        jButtonExecuteActionPerformed(evt);
+        if (!containError) {
+            String content = asmCodeCon.build().replace("\n", "\r\n");
+            System.out.println(content);
+            // Salvar arquivo
+            FileSaveUtil fileSaveUtil = new FileSaveUtil("primec.asm");
+            fileSaveUtil.save(content);
+            // Abrir arquivo
+            SystemUtils.openNotepad(fileSaveUtil.getFileFullPath());
+        }
     }//GEN-LAST:event_jButtonViewSymbolTable1ActionPerformed
 
     public static void loadWindow() {

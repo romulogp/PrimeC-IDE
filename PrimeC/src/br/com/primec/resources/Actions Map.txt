@@ -13,6 +13,7 @@
 #32 Gera código ASM Saída de ID
 #33 Atribuição à uma variável
 #34 Fim de atribuição
+#35 Fim de vetor detectado
 #45 Inicialização de variável
 #49 Armazena a Operacao Atual
 #50 Operação Left Shift

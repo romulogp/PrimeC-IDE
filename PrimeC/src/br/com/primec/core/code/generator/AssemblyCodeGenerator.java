@@ -77,6 +77,11 @@ public class AssemblyCodeGenerator {
                 + "\tSTO " + id;
     }
     
+    public final String LDV(String id) {
+        return "\n"
+                + "\tLDV " + id;
+    }
+    
     public final String HLT() {
         return "\n"
                 + "\tHLT 0";
