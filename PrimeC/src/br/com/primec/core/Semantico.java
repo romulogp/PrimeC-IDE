@@ -256,7 +256,8 @@ public class Semantico implements Constants {
             }
         } else if (currentOperation == Operation.SUBTRACT) {
             if (firstExpression) {
-                loadImmediate(currentToken.getLexeme());
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI("0"));
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUBI(currentToken.getLexeme()));
                 firstExpression = false;
             } else {
                 PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUBI(currentToken.getLexeme()));
@@ -271,12 +272,12 @@ public class Semantico implements Constants {
     public void doubleValue() {
         integerValue();
     }
-    
+        
     private void setCurrentSymbolBeingUsed() throws SemanticError {
         Symbol symbolToSet = buildSymbol(currentToken.getLexeme(), PrimecIDE.scopeStack.lastElement());
         if (symbolToSet != null) {
             symbolToSet.setUsed(true);
-        } else if (currentOperation != null) {
+        } else {
             throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" não foi declarada.");
         }
     }
