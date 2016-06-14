@@ -16,6 +16,7 @@ public class Semantico implements Constants {
     private Operation ioOperation;
     private boolean firstExpression;
     private Operation vectorOperation;
+    private Operation attribOperation;
     private Operation currentOperation;
     
     public Semantico() {
@@ -28,8 +29,9 @@ public class Semantico implements Constants {
         this.currentToken = null;
         this.currentSymbol = null;
         this.vectorOperation = null;
-        this.currentOperation = null;
+        this.attribOperation = null;
         this.firstExpression = false;
+        this.currentOperation = null;
     }
     
     public void executeAction(int action, Token currentToken) throws SemanticError {
@@ -120,9 +122,16 @@ public class Semantico implements Constants {
 
     private void vectorDeclaration() throws SemanticError {
         vectorOperation = Operation.VECTOR;
-        currentSymbol.setName(currentToken.getLexeme());
-        currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
-        currentSymbol.setVect(true);
+        if (attribOperation == null) {
+            currentSymbol.setName(currentToken.getLexeme());
+            currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
+            currentSymbol.setVect(true);
+        } else if (attribOperation.equals(Operation.ATTRIB)) {
+            // LDI vectorSize
+            // STO $indr
+            // LDV currentSymbol.getName
+            // STO ldSymbol.getName
+        }
         try {
             addSymbol(currentSymbol);
         } catch (SemanticError se) {
@@ -134,6 +143,7 @@ public class Semantico implements Constants {
         firstExpression = true;
         // Uma operação sempre inicia como positiva
         currentOperation = Operation.SUM;
+        attribOperation = Operation.ATTRIB;
         storeID();
     }
     

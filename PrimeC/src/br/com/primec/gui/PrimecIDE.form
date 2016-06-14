@@ -172,6 +172,9 @@
             <Property name="toolTipText" type="java.lang.String" value="Tabela de S&#xed;mbolos"/>
             <Property name="focusable" type="boolean" value="false"/>
           </Properties>
+          <AccessibilityProperties>
+            <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value="Gerar C&#xf3;digo Assembly"/>
+          </AccessibilityProperties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonViewSymbolTable1ActionPerformed"/>
           </Events>

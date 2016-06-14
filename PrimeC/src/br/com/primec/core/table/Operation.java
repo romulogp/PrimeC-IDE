@@ -23,7 +23,8 @@ public enum Operation {
     OP_NOT("!"),
     INPUT("input"),
     OUTPUT("output"),
-    VECTOR("vector");
+    VECTOR("vector"),
+    ATTRIB("attribution");
     
     private final String description;
 

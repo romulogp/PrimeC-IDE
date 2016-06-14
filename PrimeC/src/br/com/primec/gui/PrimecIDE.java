@@ -188,6 +188,8 @@ public class PrimecIDE extends javax.swing.JFrame {
 
         jPanelToolsLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonExecute, jButtonNew, jButtonOpen, jButtonSave, jButtonViewSymbolTable, jButtonViewSymbolTable1});
 
+        jButtonViewSymbolTable1.getAccessibleContext().setAccessibleDescription("Gerar Código Assembly");
+
         jTabbedPaneConsole.setFont(new java.awt.Font("Courier New", 0, 11)); // NOI18N
 
         jTextAreaConsole.setColumns(20);
