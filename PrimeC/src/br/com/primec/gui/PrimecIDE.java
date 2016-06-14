@@ -49,6 +49,7 @@ public class PrimecIDE extends javax.swing.JFrame {
     }
 
     private void initComponentes() {
+        semantico.init();
         asmCodeGen = new AssemblyCodeGenerator();
         asmCodeCon = new AssemblyCodeContainer();
         scopeStack = new Stack();
@@ -205,7 +206,7 @@ public class PrimecIDE extends javax.swing.JFrame {
         jTextAreaCode.setFont(new java.awt.Font("Courier New", 0, 13)); // NOI18N
         jTextAreaCode.setRows(5);
         jTextAreaCode.setTabSize(2);
-        jTextAreaCode.setText("void main () {\n\tint a;\n\n\tinput(a);\n\toutput(a);\n}");
+        jTextAreaCode.setText("void main () {\n\tint a;\n\tint vet1[5];\n\n\ta = vet1[0];\n\n\tinput(a);\n\toutput(a);\n}");
         jTextAreaCode.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 jTextAreaCodeKeyTyped(evt);

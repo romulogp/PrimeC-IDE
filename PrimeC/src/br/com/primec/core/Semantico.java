@@ -25,6 +25,7 @@ public class Semantico implements Constants {
     
     public final void init() {
         this.vectorSize = 0;
+        this.ldSymbol = null;
         this.ioOperation = null;
         this.currentToken = null;
         this.currentSymbol = null;
@@ -135,7 +136,9 @@ public class Semantico implements Constants {
         try {
             addSymbol(currentSymbol);
         } catch (SemanticError se) {
-            throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
+            if (attribOperation == null) {
+                throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
+            }
         }
     }
 
@@ -150,6 +153,7 @@ public class Semantico implements Constants {
     private void endAttribution() {
         PrimecIDE.asmCodeCon.addText(
                 PrimecIDE.asmCodeGen.STO(stoId));
+        attribOperation = null;
     }
     
     private void storeID() {
@@ -229,7 +233,7 @@ public class Semantico implements Constants {
     }
     
     public void integerValue() {
-        if (vectorOperation == Operation.VECTOR) {
+        if (vectorOperation == Operation.VECTOR && attribOperation == null) {
             vectorSize = Integer.parseInt(currentToken.getLexeme());
             PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.vector(currentSymbol.getName(), vectorSize));
             vectorOperation = null;
@@ -264,7 +268,7 @@ public class Semantico implements Constants {
         Symbol symbolToSet = buildSymbol(currentToken.getLexeme(), PrimecIDE.scopeStack.lastElement());
         if (symbolToSet != null) {
             symbolToSet.setUsed(true);
-        } else {
+        } else if (currentOperation != null) {
             throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" não foi declarada.");
         }
     }
