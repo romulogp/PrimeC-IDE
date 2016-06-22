@@ -11,6 +11,7 @@ public class Semantico implements Constants {
     private String stoId;
     private int vectorSize;
     private Symbol ldSymbol;
+    private Symbol ldvSymbol;
     private Token currentToken;
     private Symbol currentSymbol;
     private Operation ioOperation;
@@ -25,6 +26,8 @@ public class Semantico implements Constants {
     
     public final void init() {
         this.vectorSize = 0;
+        this.ldSymbol = null;
+        this.ldvSymbol = null;
         this.ioOperation = null;
         this.currentToken = null;
         this.currentSymbol = null;
@@ -51,6 +54,7 @@ public class Semantico implements Constants {
             case 32: generateOutputID(); break;
             case 33: attribution(); break;
             case 34: endAttribution(); break;
+            case 35: endVectorDetected(); break;
             case 45: initializeVar(); break;
             case 49: setCurrentOperation(); break;
             case 50: leftShift(); break;
@@ -90,6 +94,7 @@ public class Semantico implements Constants {
         currentSymbol.setType(currentToken.getLexeme());
     }
 
+    
     private void varDeclaration() throws SemanticError {
         currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
@@ -123,15 +128,14 @@ public class Semantico implements Constants {
             currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
             currentSymbol.setVect(true);
         } else if (attribOperation.equals(Operation.ATTRIB)) {
-            // LDI vectorSize
-            // STO $indr
-            // LDV currentSymbol.getName
-            // STO ldSymbol.getName
+            ldvSymbol = currentSymbol;
         }
         try {
             addSymbol(currentSymbol);
         } catch (SemanticError se) {
-            throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
+            if (attribOperation == null) {
+                throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
+            }
         }
     }
 
@@ -146,6 +150,14 @@ public class Semantico implements Constants {
     private void endAttribution() {
         PrimecIDE.asmCodeCon.addText(
                 PrimecIDE.asmCodeGen.STO(stoId));
+        attribOperation = null;
+    }
+    
+    private void endVectorDetected() {
+        if (attribOperation.equals(Operation.ATTRIB)) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("$indr"));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDV(ldvSymbol.getName()));
+        }
     }
     
     private void storeID() {
@@ -225,7 +237,7 @@ public class Semantico implements Constants {
     }
     
     public void integerValue() {
-        if (vectorOperation == Operation.VECTOR) {
+        if (vectorOperation == Operation.VECTOR && attribOperation == null) {
             vectorSize = Integer.parseInt(currentToken.getLexeme());
             PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.vector(currentSymbol.getName(), vectorSize));
             vectorOperation = null;
@@ -240,7 +252,8 @@ public class Semantico implements Constants {
             }
         } else if (currentOperation == Operation.SUBTRACT) {
             if (firstExpression) {
-                loadImmediate(currentToken.getLexeme());
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI("0"));
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUBI(currentToken.getLexeme()));
                 firstExpression = false;
             } else {
                 PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUBI(currentToken.getLexeme()));
@@ -255,7 +268,7 @@ public class Semantico implements Constants {
     public void doubleValue() {
         integerValue();
     }
-    
+        
     private void setCurrentSymbolBeingUsed() throws SemanticError {
         Symbol symbolToSet = buildSymbol(currentToken.getLexeme(), PrimecIDE.scopeStack.lastElement());
         if (symbolToSet != null) {

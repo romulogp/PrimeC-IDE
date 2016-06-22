@@ -222,7 +222,7 @@ OUTPUT     = ID : "output"
 <expression10>	::= <expression10> <op_term> #49 <expression11> #60 | <expression11> ;
 <expression11>	::= <expression11> <op_factor> <expression12> #61 | <expression12> ;
 <expression12>	::= OP_MENOS #49 <expression12> #62 | <expression13> ;
-<expression13>	::= <v_val> | "(" <expression> ")" | ID #100 #32 | <vect> ;
+<expression13>	::= <v_val> | "(" <expression> ")" | ID #100 #32 | <vect> #35 ;
 
 <op_relational>	::= OP_GT | OP_LT | OP_GTE | OP_LTE | OP_NEQ | OP_EQ ;
 

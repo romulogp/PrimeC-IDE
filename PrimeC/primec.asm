@@ -1,10 +1,11 @@
 .data
 	a : 0
+	vet : 0, 0, 0
 .text
-	LDI 0
-	STO a
-	LDI 2
-	ADD a
+	LDI 10
 	SUB a
+	ADDI 0
+	STO $indr
+	LDV vet
 	STO a
 	HLT 0

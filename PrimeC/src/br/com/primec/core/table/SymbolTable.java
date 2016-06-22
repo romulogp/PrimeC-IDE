@@ -82,7 +82,8 @@ public class SymbolTable {
     public String checkUsedNotInitialized() {
         for (Symbol s : symbols) {
             if (!s.isFunction() && !s.isParam()
-                    && s.isUsed() && !s.isInitialized()) {
+                    && s.isUsed() && !s.isInitialized() 
+                    && !s.isVect()) {
                 return "A variável \"" + s.getName() + "\" não foi inicializada.\n";
             }
         }
