@@ -34,7 +34,7 @@ public class Semantico implements Constants {
         this.currentOperation = null;
     }
     
-    public void executeAction(int action, Token currentToken) throws SemanticError {
+    public void executeAction(int action, Token currentToken) throws SemanticError {       
         this.currentToken = currentToken;
         switch (action) {
             case 1: detectVarType(); break;
@@ -59,15 +59,11 @@ public class Semantico implements Constants {
             case 62: negativeNumber(); break;
             case 70: integerValue(); break;
             case 71: doubleValue(); break;
+            case 99: init(); break;
             case 100: setCurrentSymbolBeingUsed(); break;
         }
-//         showLog();
     }
 
-    private void showLog() {
-        System.out.print(currentToken.getLexeme());
-        System.out.println(PrimecIDE.symbolTable.toString());
-    }
 
     private void modifyScope() {
         PrimecIDE.scopeStack.push(PrimecIDE.scopeStack.pop() + PrimecIDE.getNextScopeSerial());

@@ -92,6 +92,7 @@ public class SymbolTable {
     @Override
     public String toString() {
         String toString = "";
+        
         for (Symbol s : symbols) {
             toString += ""
                     + "\n\t"

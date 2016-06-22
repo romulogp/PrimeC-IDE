@@ -1921,7 +1921,7 @@ public interface ScannerConstants {
 
     String[] SCANNER_ERROR
             = {
-                "Caractere n�o esperado",
+                "Caractere não esperado",
                 "",
                 "",
                 "Erro identificando STR_VL",

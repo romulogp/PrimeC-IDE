@@ -8,7 +8,7 @@ SemanticName = Semantico
 Package = br.com.primec.core
 ScannerCaseSensitive = true
 ScannerTable = Compact
-Input = Stream
+Input = String
 Parser = SLR
 #RegularDefinitions
 L        : [A-Za-z]
@@ -149,7 +149,7 @@ OUTPUT     = ID : "output"
 <main>      	::= VOID MAIN #9 "(" ")" "{" <cmd_seq> "}" #10
 		  | VOID MAIN #9 "(" ")" "{" "}" #10 ;
 
-<cmd_seq>   	::= <cmd> <cmd_seq> | <cmd> ;
+<cmd_seq>   	::= <cmd> #99 <cmd_seq> | <cmd> #99 ;
 
 <cmd>       	::= CONST <v_dec> ";"
 		  | <v_dec> ";" 
@@ -167,12 +167,14 @@ OUTPUT     = ID : "output"
 <attrib>    	::= <v_dec> #45 "=" #33 <func_call>
 		  | <v_dec> #45 "=" #33 <expression>
 		  | ID #100 "=" #33 <func_call>
-		  | ID #100 "=" #33 <expression> ;
+		  | ID #100 "=" #33 <expression>
+		  | <vect> "=" #33 <func_call>
+		  | <vect> "=" #33 <expression>  ;
 
-<v_dec>     	::= <v_typ> ID #100 #2
-		  | <v_typ> <vect> ;
+<v_dec>     	::= <v_typ> ID #2
+		  | <v_typ> ID #4 "[" <expression> "]" ;
 
-<vect>		::= ID #100 #4 "[" <expression> "]" ;
+<vect>		::= ID #100 "[" <expression> "]" ;
 
 <v_typ>     	::= HEX #1
 		  | BIN #1
@@ -192,11 +194,11 @@ OUTPUT     = ID : "output"
 <for>       	::= FOR #9 "(" INT #1 ID #20 #45 "=" INT_VL ";" <expression> ";" ID #100 OP_MAIS OP_MAIS ")" "{" <cmd_seq> "}" #10
 		  | FOR #9 "(" INT #1 ID #20 #45 "=" INT_VL ";" <expression> ";" ID #100 OP_MAIS OP_MAIS ")" "{" "}" #10 ;
 
-<while>     	::= WHILE "(" <expression> ")" "{" <cmd_seq> "}"
-		  | WHILE "(" <expression> ")" "{" "}" ;
+<while>     	::= WHILE #9 "(" <expression> ")" "{" <cmd_seq> "}" #10
+		  | WHILE #9 "(" <expression> ")" "{" "}" #10 ;
 
-<do_while>  	::= DO "{" <cmd_seq> "}" WHILE "(" <expression> ")"
-		  | DO "{" "}" WHILE "(" <expression> ")" ;
+<do_while>  	::= DO #9 "{" <cmd_seq> "}" WHILE "(" <expression> ")" #10
+		  | DO #9 "{" "}" WHILE "(" <expression> ")" #10 ;
 
 <if>         	::= IF #9 "(" <expression> ")" "{" <cmd_seq> "}" #10
 		  | IF #9 "(" <expression> ")" "{" <cmd_seq> "}" #10 <else>

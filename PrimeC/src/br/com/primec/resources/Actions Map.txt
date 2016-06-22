@@ -36,4 +36,5 @@
 #62 Número Negativo
 #70 Valor do Tipo Inteiro
 #71 Valor do Tipo Double
+#99 Fim da Linha
 #100 Uso de variável
