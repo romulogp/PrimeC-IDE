@@ -18,6 +18,7 @@ public class Semantico implements Constants {
     private boolean firstExpression;
     private Operation vectorOperation;
     private Operation attribOperation;
+    private Operation commandOperation;
     private Operation currentOperation;
     
     public Semantico() {
@@ -34,10 +35,11 @@ public class Semantico implements Constants {
         this.vectorOperation = null;
         this.attribOperation = null;
         this.firstExpression = false;
+        this.commandOperation = null;
         this.currentOperation = null;
     }
     
-    public void executeAction(int action, Token currentToken) throws SemanticError {       
+    public void executeAction(int action, Token currentToken) throws SemanticError {
         this.currentToken = currentToken;
         switch (action) {
             case 1: detectVarType(); break;
@@ -68,7 +70,6 @@ public class Semantico implements Constants {
         }
     }
 
-
     private void modifyScope() {
         PrimecIDE.scopeStack.push(PrimecIDE.scopeStack.pop() + PrimecIDE.getNextScopeSerial());
     }
@@ -79,13 +80,15 @@ public class Semantico implements Constants {
     
     private void pushScope() {
         PrimecIDE.scopeStack.push(currentToken.getLexeme());
+        // gravar o comando IF
+        setCurrentOperation();
+        commandOperation = currentOperation;
     }
 
     private void popScope() {
         PrimecIDE.scopeStack.pop();
         if (PrimecIDE.scopeStack.lastElement().equals(Scope.GLOBAL.getDescription())) {
-            PrimecIDE.asmCodeCon.addText(
-                    PrimecIDE.asmCodeGen.HLT());
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.HLT());
         }
     }
     
@@ -101,7 +104,7 @@ public class Semantico implements Constants {
         try {
             addSymbol(currentSymbol);
             PrimecIDE.asmCodeCon.addData(
-                    PrimecIDE.asmCodeGen.var(currentSymbol.getName()));
+                    PrimecIDE.asmCodeGen.VAR(currentSymbol.getName()));
             ldSymbol = currentSymbol;
 //            currentSymbol = null;
         } catch (SemanticError se) {
@@ -127,8 +130,6 @@ public class Semantico implements Constants {
             currentSymbol.setName(currentToken.getLexeme());
             currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
             currentSymbol.setVect(true);
-        } else if (attribOperation.equals(Operation.ATTRIB)) {
-            ldvSymbol = currentSymbol;
         }
         try {
             addSymbol(currentSymbol);
@@ -148,13 +149,13 @@ public class Semantico implements Constants {
     }
     
     private void endAttribution() {
-        PrimecIDE.asmCodeCon.addText(
-                PrimecIDE.asmCodeGen.STO(stoId));
+        PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO(stoId));
         attribOperation = null;
     }
     
     private void endVectorDetected() {
         if (attribOperation.equals(Operation.ATTRIB)) {
+            ldvSymbol = currentSymbol;
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("$indr"));
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDV(ldvSymbol.getName()));
         }
@@ -204,27 +205,6 @@ public class Semantico implements Constants {
         // Right Shift
     }
     
-//    public void sumOrSubtract() {
-//        double value1 = obtainValue(values.lastElement(), PrimecIDE.scopeStack.lastElement());
-//        double value2 = obtainValue(values.lastElement(), PrimecIDE.scopeStack.lastElement());
-//        
-//        if (currentOperation == Operation.SUM) {
-//            PrimecIDE.scopeStack.push(String.valueOf(value1 + value2));
-//        } else if (currentOperation == Operation.SUBTRACT) {
-//            PrimecIDE.scopeStack.push(String.valueOf(value1 - value2));
-//        }
-//    }
-    
-//    public double obtainValue(String name, String scope) {
-//        Symbol tempSymbol;
-//        if ((tempSymbol = buildSymbol(name, scope)) != null) {
-//            values.pop();
-//            return tempSymbol.getValue();
-//        } else {
-//            return Double.parseDouble(values.pop());
-//        }
-//    }
-    
     public Symbol buildSymbol(String name, String scope) {
         currentSymbol = new Symbol();
         currentSymbol.setName(name);
@@ -237,9 +217,9 @@ public class Semantico implements Constants {
     }
     
     public void integerValue() {
-        if (vectorOperation == Operation.VECTOR && attribOperation == null) {
+        if (vectorOperation == Operation.VECTOR) {
             vectorSize = Integer.parseInt(currentToken.getLexeme());
-            PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.vector(currentSymbol.getName(), vectorSize));
+            PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.VECT(currentSymbol.getName(), vectorSize));
             vectorOperation = null;
         } else if (ioOperation == Operation.OUTPUT) {
             generateOutputValue();
@@ -281,13 +261,13 @@ public class Semantico implements Constants {
     private void generateInput() {
         if (ioOperation == Operation.INPUT) {
             PrimecIDE.asmCodeCon.addText(
-                    PrimecIDE.asmCodeGen.input(currentToken.getLexeme()));
+                    PrimecIDE.asmCodeGen.INPUT(currentToken.getLexeme()));
         }
     }
     
     private void generateOutputID() {
         if (ioOperation == Operation.OUTPUT) {
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.outputId(currentToken.getLexeme()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.OUTPUT(currentToken.getLexeme()));
         } else if (currentOperation == Operation.SUM) {
             if (firstExpression) {
                 PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD(currentToken.getLexeme()));
@@ -308,7 +288,7 @@ public class Semantico implements Constants {
     
     private void generateOutputValue() {
         if (ioOperation == Operation.OUTPUT) {
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.outputValue(currentToken.getLexeme()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.INT_OUTPUT(currentToken.getLexeme()));
         }
     }
     

@@ -6,33 +6,33 @@ package br.com.primec.core.code.generator;
  */
 public class AssemblyCodeGenerator {
     
-    public final String input(String id) {
+    public final String INPUT(String id) {
         return "\n"
                 + "\tLD $in_port"
                 + "\n"
                 + "\tSTO " + id;
     }
     
-    public final String outputId(String id) {
+    public final String OUTPUT(String id) {
         return "\n"
                 + "\tLD " + id
                 + "\n"
                 + "\tSTO $out_port";
     }
     
-    public final String outputValue(String value) {
+    public final String INT_OUTPUT(String value) {
         return "\n"
                 + "\tLDI " + value
                 + "\n"
                 + "\tSTO $out_port";          
     }
     
-    public final String var(String id) {
+    public final String VAR(String id) {
         return "\n"
                 + "\t" + id + " : 0";
     }
     
-    public final String vector(String id, int size) {
+    public final String VECT(String id, int size) {
         String data = "\n"
                 + "\t" + id + " : ";
         for (int i = 0; i < size-1; i++) {

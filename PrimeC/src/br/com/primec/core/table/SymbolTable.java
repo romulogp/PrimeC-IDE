@@ -70,24 +70,26 @@ public class SymbolTable {
     }
 
     public String checkDeclaredNotUsed() {
+        String text = "";
         for (Symbol s : symbols) {
             if (!s.isFunction() && !s.isParam()
                     && !s.isUsed()) {
-                return "A variável \"" + s.getName() + "\" não é utilizada.\n";
+                text += "A variável \"" + s.getName() + "\" não é utilizada.\n";
             }
         }
-        return "";
+        return text;
     }
 
     public String checkUsedNotInitialized() {
+        String text = "";
         for (Symbol s : symbols) {
             if (!s.isFunction() && !s.isParam()
                     && s.isUsed() && !s.isInitialized() 
                     && !s.isVect()) {
-                return "A variável \"" + s.getName() + "\" não foi inicializada.\n";
+                text += "A variável \"" + s.getName() + "\" não foi inicializada.\n";
             }
         }
-        return "";
+        return text;
     }
 
     @Override
