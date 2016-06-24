@@ -82,6 +82,16 @@ public class AssemblyCodeGenerator {
                 + "\tLDV " + id;
     }
     
+    public final String BNE(String id) {
+        return "\n"
+                + "\tBNE " + id;
+    }
+    
+    public final String LBL(String label) {
+        return "\n"
+                + label + ":";
+    }
+    
     public final String HLT() {
         return "\n"
                 + "\tHLT 0";

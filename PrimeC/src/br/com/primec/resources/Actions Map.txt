@@ -15,6 +15,8 @@
 #34 Fim de atribuição
 #35 Fim de vetor detectado
 #45 Inicialização de variável
+#47 Finaliza a operação do Comando Atual
+#48 Armazena a Operacao do Comando Atual
 #49 Armazena a Operacao Atual
 #50 Operação Left Shift
 #51 Operação Right Shift

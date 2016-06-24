@@ -21,6 +21,7 @@ public class Semantico implements Constants {
     private Operation commandOperation;
     private Operation currentOperation;
     
+    
     public Semantico() {
         init();
     }
@@ -58,6 +59,8 @@ public class Semantico implements Constants {
             case 34: endAttribution(); break;
             case 35: endVectorDetected(); break;
             case 45: initializeVar(); break;
+            case 47: endCommandOperation(); break;
+            case 48: setCommandOperation(); break;
             case 49: setCurrentOperation(); break;
             case 50: leftShift(); break;
             case 51: rightShift(); break;
@@ -89,6 +92,13 @@ public class Semantico implements Constants {
         PrimecIDE.scopeStack.pop();
         if (PrimecIDE.scopeStack.lastElement().equals(Scope.GLOBAL.getDescription())) {
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.HLT());
+        }
+        if (commandOperation == Operation.IF) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD("1000"));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUB("1001"));
+            if (currentOperation == Operation.OP_EQ) {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL("fim_" + PrimecIDE.scopeStack.lastElement()));
+            }
         }
     }
     
@@ -186,15 +196,28 @@ public class Semantico implements Constants {
         currentSymbol.setName(currentToken.getLexeme());
         PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack).setInitialized(true);
     }
-
+    
+    public void endCommandOperation() {
+        if (commandOperation == Operation.IF) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BNE("fim_" + PrimecIDE.scopeStack.lastElement()));
+        }
+    }
+    
+    public void setCommandOperation() {
+        this.commandOperation = getOperation(currentToken.getLexeme());
+    }
+    
     private void setCurrentOperation() {
-        String OP = currentToken.getLexeme();
-        
+        currentOperation = getOperation(currentToken.getLexeme());
+    }
+    
+    private Operation getOperation(String search) {
         for (Operation operation : Operation.values()) {
-            if (OP.equals(operation.getDescription())) {
-                currentOperation = operation;
+            if (operation.getDescription().equals(search)) {
+                 return operation;
             }
         }
+        return null;
     }
     
     public void leftShift() {
@@ -217,6 +240,10 @@ public class Semantico implements Constants {
     }
     
     public void integerValue() {
+        if (commandOperation == Operation.IF) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI(currentToken.getLexeme()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("1001"));
+        }
         if (vectorOperation == Operation.VECTOR) {
             vectorSize = Integer.parseInt(currentToken.getLexeme());
             PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.VECT(currentSymbol.getName(), vectorSize));
@@ -266,6 +293,10 @@ public class Semantico implements Constants {
     }
     
     private void generateOutputID() {
+        if (commandOperation == Operation.IF) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD(currentToken.getLexeme()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("1000"));
+        }
         if (ioOperation == Operation.OUTPUT) {
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.OUTPUT(currentToken.getLexeme()));
         } else if (currentOperation == Operation.SUM) {
