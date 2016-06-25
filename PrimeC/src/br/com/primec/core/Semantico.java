@@ -60,7 +60,6 @@ public class Semantico implements Constants {
             case 35: endVectorDetected(); break;
             case 45: initializeVar(); break;
             case 47: endCommandOperation(); break;
-            case 48: setCommandOperation(); break;
             case 49: setCurrentOperation(); break;
             case 50: leftShift(); break;
             case 51: rightShift(); break;
