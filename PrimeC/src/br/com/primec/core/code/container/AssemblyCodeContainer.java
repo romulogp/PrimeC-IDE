@@ -1,43 +1,47 @@
 package br.com.primec.core.code.container;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AssemblyCodeContainer {
 
-    private String data;
-    private String text;
-
+    private final List<String> data = new ArrayList<>();
+    private final List<String> text = new ArrayList<>();
+    
     public AssemblyCodeContainer() {
-        this.data = ""
-                + ".data";
-        this.text = ""
-                + ".text";
+        this.data.add(".data");
+        this.text.add(".text");
     }
 
     public String build() {
-        return this.data + "\n" + this.text;
+        String tempData = "";
+        String tempText = "";
+        tempData = data.stream().map((d) -> d).reduce(tempData, String::concat);
+        tempText = text.stream().map((t) -> t).reduce(tempText, String::concat);
+        
+        return tempData + "\n" + tempText;
     }
     
     public void addData(String data) {
-        this.data = this.data + data;
+        this.data.add(data);
     }
     
     public void addText(String text) {
-        this.text = this.text + text;
+        this.text.add(text);
     }
     
-    public String getData() {
+    public List<String> getData() {
         return data;
     }
 
-    public void setData(String data) {
-        this.data = data;
-    }
-
-    public String getText() {
+    public List<String> getText() {
         return text;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public static void main(String[] args) {
+        AssemblyCodeContainer acc = new AssemblyCodeContainer();
+        
+        System.out.println(acc.build());
     }
-
+    
 }

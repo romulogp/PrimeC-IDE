@@ -87,9 +87,24 @@ public class AssemblyCodeGenerator {
                 + "\tBNE " + id;
     }
     
+    public final String BGE(String id) {
+        return "\n"
+                + "\tBGE " + id;
+    }
+        
+    public final String LTE(String id) {
+        return "\n"
+                + "\tLTE " + id;
+    }
+    
     public final String LBL(String label) {
         return "\n"
                 + label + ":";
+    }
+    
+    public final String JMP(String label) {
+        return "\n"
+                + "\tJMP " + label;
     }
     
     public final String HLT() {

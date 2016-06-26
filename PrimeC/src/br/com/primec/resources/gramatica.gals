@@ -8,7 +8,7 @@ SemanticName = Semantico
 Package = br.com.primec.core
 ScannerCaseSensitive = true
 ScannerTable = Compact
-Input = Stream
+Input = String
 Parser = SLR
 #RegularDefinitions
 L        : [A-Za-z]
@@ -149,7 +149,7 @@ OUTPUT     = ID : "output"
 <main>      	::= VOID MAIN #9 "(" ")" "{" <cmd_seq> "}" #10
 		  | VOID MAIN #9 "(" ")" "{" "}" #10 ;
 
-<cmd_seq>   	::= <cmd> #99 <cmd_seq> | <cmd> #99 ;
+<cmd_seq>   	::= <cmd> #99 <cmd_seq> | <cmd> #99;
 
 <cmd>       	::= CONST <v_dec> ";"
 		  | <v_dec> ";" 
@@ -194,20 +194,20 @@ OUTPUT     = ID : "output"
 <for>       	::= FOR #9 "(" INT #1 ID #20 #45 "=" INT_VL ";" <expression> ";" ID #100 OP_MAIS OP_MAIS ")" "{" <cmd_seq> "}" #10
 		  | FOR #9 "(" INT #1 ID #20 #45 "=" INT_VL ";" <expression> ";" ID #100 OP_MAIS OP_MAIS ")" "{" "}" #10 ;
 
-<while>     	::= WHILE #9 "(" <expression> ")" "{" <cmd_seq> "}" #10
-		  | WHILE #9 "(" <expression> ")" "{" "}" #10 ;
+<while>     	::= WHILE #9 "(" <expression> ")" #47 "{" <cmd_seq> "}" #10 #42
+		  | WHILE #9 "(" <expression> ")" #47 "{" "}" #10 #42 ;
 
 <do_while>  	::= DO #9 "{" <cmd_seq> "}" WHILE "(" <expression> ")" #10
 		  | DO #9 "{" "}" WHILE "(" <expression> ")" #10 ;
 
-<if>         	::= IF #9 "(" <expression> ")" "{" <cmd_seq> "}" #10
-		  | IF #9 "(" <expression> ")" "{" <cmd_seq> "}" #10 <else>
-		  | IF #9 "(" <expression> ")" "{" "}" #10
-		  | IF #9 "(" <expression> ")" "{" "}" #10 <else> ;
+<if>         	::= IF #9 "(" <expression> ")" #47 "{" <cmd_seq> "}" #10 #43
+		  | IF #9 "(" <expression> ")" #47 "{" <cmd_seq> "}" #10 <else>
+		  | IF #9 "(" <expression> ")" #47 "{" "}" #10 #43
+		  | IF #9 "(" <expression> ")" #47 "{" "}" #10 <else> ;
 
 <else>       	::= ELSE <if>
-		  | ELSE #9 "{" "}" #10 
-		  | ELSE #9 "{" <cmd_seq> "}" #10 ;
+		  | ELSE #9 #44 "{" "}" #10 #43
+		  | ELSE #9 #44 "{" <cmd_seq> "}" #10 #43 ;
 
 <expression>	::= <expression>	 OP_LSHIFT #49 <expression1> #50	| <expression1> ;
 <expression1>	::= <expression1> OP_RSHIFT #49 <expression2> #51	| <expression2> ;
@@ -218,7 +218,7 @@ OUTPUT     = ID : "output"
 <expression6>	::= <expression6> OP_OR <expression7> | <expression7> ;
 <expression7>	::= <expression7> OP_AND	<expression8> | <expression8> ;
 <expression8>	::= OP_NOT <expression8> | <expression9> ;
-<expression9>	::= <expression9> <op_relational> #48 #49 <expression10> | <expression10> ;
+<expression9>	::= <expression9> <op_relational> #49 #46 <expression10> | <expression10> ;
 <expression10>	::= <expression10> <op_term> #49 <expression11> #60 | <expression11> ;
 <expression11>	::= <expression11> <op_factor> <expression12> #61 | <expression12> ;
 <expression12>	::= OP_MENOS #49 <expression12> #62 | <expression13> ;

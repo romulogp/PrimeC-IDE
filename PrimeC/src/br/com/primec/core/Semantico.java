@@ -20,7 +20,10 @@ public class Semantico implements Constants {
     private Operation attribOperation;
     private Operation commandOperation;
     private Operation currentOperation;
-    
+    private Operation relacionalOperation;
+    private Operation lineOperation;
+    private String tempScopeName;
+    private String jumpLabel;
     
     public Semantico() {
         init();
@@ -38,6 +41,7 @@ public class Semantico implements Constants {
         this.firstExpression = false;
         this.commandOperation = null;
         this.currentOperation = null;
+        this.relacionalOperation = null;
     }
     
     public void executeAction(int action, Token currentToken) throws SemanticError {
@@ -58,13 +62,14 @@ public class Semantico implements Constants {
             case 33: attribution(); break;
             case 34: endAttribution(); break;
             case 35: endVectorDetected(); break;
-            case 45: initializeVar(); break;
+            case 42: endWhileCommand(); break;
+            case 43: endIfCommand(); break;
+            case 44: startElseCommand(); break;
+            case 45: setVariableInitialized(); break;
+            case 46: setRelacionalOperation(); break;
             case 47: endCommandOperation(); break;
+            case 48: setCommandOperation(); break;
             case 49: setCurrentOperation(); break;
-            case 50: leftShift(); break;
-            case 51: rightShift(); break;
-            case 60: /* sumOrSubtract(); */ break;
-            case 62: negativeNumber(); break;
             case 70: integerValue(); break;
             case 71: doubleValue(); break;
             case 99: init(); break;
@@ -72,41 +77,12 @@ public class Semantico implements Constants {
         }
     }
 
-    private void modifyScope() {
-        PrimecIDE.scopeStack.push(PrimecIDE.scopeStack.pop() + PrimecIDE.getNextScopeSerial());
-    }
-
-    private void addSymbol(Symbol symbol) throws SemanticError {
-        PrimecIDE.symbolTable.add(symbol);
-    }
-    
-    private void pushScope() {
-        PrimecIDE.scopeStack.push(currentToken.getLexeme());
-        // gravar o comando IF
-        setCurrentOperation();
-        commandOperation = currentOperation;
-    }
-
-    private void popScope() {
-        PrimecIDE.scopeStack.pop();
-        if (PrimecIDE.scopeStack.lastElement().equals(Scope.GLOBAL.getDescription())) {
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.HLT());
-        }
-        if (commandOperation == Operation.IF) {
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD("1000"));
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUB("1001"));
-            if (currentOperation == Operation.OP_EQ) {
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL("fim_" + PrimecIDE.scopeStack.lastElement()));
-            }
-        }
-    }
-    
+    // #1
     private void detectVarType() {
         currentSymbol = new Symbol();
         currentSymbol.setType(currentToken.getLexeme());
     }
-
-    
+    // #2
     private void varDeclaration() throws SemanticError {
         currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
@@ -120,7 +96,7 @@ public class Semantico implements Constants {
             throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
         }
     }
-
+    // #3
     private void functionDeclaration() throws SemanticError {
         currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
@@ -132,7 +108,7 @@ public class Semantico implements Constants {
         }
         pushScope();
     }
-
+    // #4
     private void vectorDeclaration() throws SemanticError {
         vectorOperation = Operation.VECTOR;
         if (attribOperation == null) {
@@ -148,37 +124,38 @@ public class Semantico implements Constants {
             }
         }
     }
-
-    private void attribution() {
-        firstExpression = true;
-        // Uma operação sempre inicia como positiva
-        currentOperation = Operation.SUM;
-        attribOperation = Operation.ATTRIB;
-        storeID();
-    }
-    
-    private void endAttribution() {
-        PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO(stoId));
-        attribOperation = null;
-    }
-    
-    private void endVectorDetected() {
-        if (attribOperation.equals(Operation.ATTRIB)) {
-            ldvSymbol = currentSymbol;
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("$indr"));
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDV(ldvSymbol.getName()));
+    // #9
+    private void pushScope() {
+        if (PrimecIDE.scopeStack.lastElement().equals(Scope.GLOBAL.getDescription())) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL("main0"));
+        }
+        PrimecIDE.scopeStack.push(currentToken.getLexeme() + PrimecIDE.getNextScopeSerial());
+        
+        tempScopeName = PrimecIDE.scopeStack.lastElement();
+        setCommandOperation();
+        if (commandOperation == Operation.WHILE) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL(tempScopeName));
         }
     }
-    
-    private void storeID() {
-        this.stoId = currentSymbol.getName();
+    //# 10
+    private void popScope() {
+        PrimecIDE.scopeStack.pop();
+//        if (commandOperation == Operation.ELSE) {
+//            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.JMP("fim_" + jumpLabel));
+//        }
+        if (commandOperation == Operation.WHILE) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.JMP(tempScopeName));
+        }
+        if (PrimecIDE.scopeStack.size() == 1) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.HLT());
+        }
     }
-    
+    // #20
     private void forScopeChange() throws SemanticError {
         modifyScope();
         varDeclaration();
     }
-
+    // #24
     private void functionParameteresDeclaration() throws SemanticError {
         currentSymbol.setName(currentToken.getLexeme());
         currentSymbol.setScope(PrimecIDE.scopeStack.lastElement());
@@ -189,110 +166,33 @@ public class Semantico implements Constants {
             throw new SemanticError("A variável " + currentSymbol.getName() + " já foi declarada.", currentToken.getPosition());
         }
     }
-
-    private void initializeVar() {
-        currentSymbol = new Symbol();
-        currentSymbol.setName(currentToken.getLexeme());
-        PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack).setInitialized(true);
-    }
-    
-    public void endCommandOperation() {
-        if (commandOperation == Operation.IF) {
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BNE("fim_" + PrimecIDE.scopeStack.lastElement()));
-        }
-    }
-    
-    public void setCommandOperation() {
-        this.commandOperation = getOperation(currentToken.getLexeme());
-    }
-    
-    private void setCurrentOperation() {
-        currentOperation = getOperation(currentToken.getLexeme());
-    }
-    
-    private Operation getOperation(String search) {
-        for (Operation operation : Operation.values()) {
-            if (operation.getDescription().equals(search)) {
-                 return operation;
-            }
-        }
-        return null;
-    }
-    
-    public void leftShift() {
-        // Left Shift
-    }
-    
-    public void rightShift() {
-        // Right Shift
-    }
-    
-    public Symbol buildSymbol(String name, String scope) {
-        currentSymbol = new Symbol();
-        currentSymbol.setName(name);
-        currentSymbol.setScope(scope);
-        return PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack);
-    }
-    
-    public void negativeNumber() {
-        
-    }
-    
-    public void integerValue() {
-        if (commandOperation == Operation.IF) {
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI(currentToken.getLexeme()));
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("1001"));
-        }
-        if (vectorOperation == Operation.VECTOR) {
-            vectorSize = Integer.parseInt(currentToken.getLexeme());
-            PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.VECT(currentSymbol.getName(), vectorSize));
-            vectorOperation = null;
-        } else if (ioOperation == Operation.OUTPUT) {
-            generateOutputValue();
-        } else if (currentOperation == Operation.SUM) {
-            if (firstExpression) {
-                loadImmediate(currentToken.getLexeme());
-                firstExpression = false;
-            } else {
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.ADDI(currentToken.getLexeme()));
-            }
-        } else if (currentOperation == Operation.SUBTRACT) {
-            if (firstExpression) {
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI("0"));
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUBI(currentToken.getLexeme()));
-                firstExpression = false;
-            } else {
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUBI(currentToken.getLexeme()));
-            }
-        }
-    }
-    
-    private void loadImmediate(String value) {
-        PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI(value));
-    }
-    
-    public void doubleValue() {
-        integerValue();
-    }
-        
-    private void setCurrentSymbolBeingUsed() throws SemanticError {
-        Symbol symbolToSet = buildSymbol(currentToken.getLexeme(), PrimecIDE.scopeStack.lastElement());
-        if (symbolToSet != null) {
-            symbolToSet.setUsed(true);
+    // #29
+    private void openCloseInputOperation() {
+        if (ioOperation == null) {
+            this.ioOperation = Operation.INPUT;
         } else {
-            throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" não foi declarada.");
+            this.ioOperation = null;
         }
     }
-    
+    // #30
+    private void openCloseOutputOperation() {
+        if (ioOperation == null) {
+            this.ioOperation = Operation.OUTPUT;
+        } else {
+            this.ioOperation = null;
+        }
+    }
+    // #31
     private void generateInput() {
         if (ioOperation == Operation.INPUT) {
             PrimecIDE.asmCodeCon.addText(
                     PrimecIDE.asmCodeGen.INPUT(currentToken.getLexeme()));
         }
     }
-    
+    // #32
     private void generateOutputID() {
-        if (commandOperation == Operation.IF) {
+        if ((lineOperation == Operation.IF && commandOperation == Operation.IF)
+                || (lineOperation == Operation.WHILE && commandOperation == Operation.WHILE)){
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD(currentToken.getLexeme()));
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("1000"));
         }
@@ -315,27 +215,175 @@ public class Semantico implements Constants {
             }
         }
     }
+    // #33
+    private void attribution() {
+        firstExpression = true;
+        
+        currentOperation = Operation.SUM; // Uma operação sempre inicia como positiva
+        attribOperation = Operation.ATTRIB;
+        lineOperation = attribOperation;
+        storeID();
+    }
+    // #34
+    private void endAttribution() {
+        PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO(stoId));
+        attribOperation = null;
+    }
+    // #35
+    private void endVectorDetected() {
+        if (attribOperation.equals(Operation.ATTRIB)) {
+            ldvSymbol = currentSymbol;
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("$indr"));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDV(ldvSymbol.getName()));
+        }
+    }
+    // #42
+    private void endWhileCommand() {
+        if (!tempScopeName.isEmpty()) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.JMP(tempScopeName));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL("fim_" + tempScopeName));
+            tempScopeName = "";
+        }
+    }
+    // #43
+    private void endIfCommand() {
+        if (!tempScopeName.isEmpty()) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL("fim_" + tempScopeName));
+            tempScopeName = "";
+        }
+    }
+    // #44
+    private void startElseCommand() {
+        commandOperation = Operation.ELSE;
+        jumpLabel = tempScopeName;
+        tempScopeName = PrimecIDE.scopeStack.lastElement();
+        if (relacionalOperation == Operation.OP_EQ) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BNE("fim_" + tempScopeName));
+        }
+    }
+    // #45
+    private void setVariableInitialized() {
+        currentSymbol = new Symbol();
+        currentSymbol.setName(currentToken.getLexeme());
+        PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack).setInitialized(true);
+    }
+    // #46
+    private void setRelacionalOperation() {
+        this.relacionalOperation = currentOperation;
+    }
+    // #47
+    public void endCommandOperation() {
+        if ((lineOperation == Operation.IF && commandOperation == Operation.IF)
+                || (lineOperation == Operation.WHILE && commandOperation == Operation.WHILE)) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD("1000"));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUB("1001"));
+            tempScopeName = PrimecIDE.scopeStack.lastElement();
+            if (relacionalOperation == Operation.OP_EQ) {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BNE("fim_" + tempScopeName));
+            } else if (relacionalOperation == Operation.OP_NEQ) {
+                
+            } else if (relacionalOperation == Operation.OP_LT) {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BGE("fim_" + tempScopeName));
+            } else if (relacionalOperation == Operation.OP_GT) {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LTE("fim_" + tempScopeName));
+            }
+        }
+        commandOperation = null;
+    }
+    // #48
+    public void setCommandOperation() {
+        this.commandOperation = searchOperation(currentToken.getLexeme());
+        this.lineOperation = commandOperation;
+    }
+    // #49
+    private void setCurrentOperation() {
+        currentOperation = searchOperation(currentToken.getLexeme());
+    }
+    // #70
+    public void integerValue() {
+        if ((lineOperation == Operation.IF && commandOperation == Operation.IF)
+                || (lineOperation == Operation.WHILE && commandOperation == Operation.WHILE)){
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI(currentToken.getLexeme()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("1001"));
+        } else if (vectorOperation == Operation.VECTOR) {
+            vectorSize = Integer.parseInt(currentToken.getLexeme());
+            PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.VECT(currentSymbol.getName(), vectorSize));
+            vectorOperation = null;
+        } else if (ioOperation == Operation.OUTPUT) {
+            generateOutputValue();
+        } else if (currentOperation == Operation.SUM) {
+            if (firstExpression) {
+                loadImmediate(currentToken.getLexeme());
+                firstExpression = false;
+            } else {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.ADDI(currentToken.getLexeme()));
+            }
+        } else if (currentOperation == Operation.SUBTRACT) {
+            if (firstExpression) {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI("0"));
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUBI(currentToken.getLexeme()));
+                firstExpression = false;
+            } else {
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUBI(currentToken.getLexeme()));
+            }
+        }
+    }
+    // #71
+    public void doubleValue() {
+        integerValue();
+    }    
+    // #100
+    private void setCurrentSymbolBeingUsed() throws SemanticError {
+        Symbol symbolToSet = buildSymbol(currentToken.getLexeme(), PrimecIDE.scopeStack.lastElement());
+        if (symbolToSet != null) {
+            symbolToSet.setUsed(true);
+        } else {
+            throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" não foi declarada.");
+        }
+    }
     
+    // LDI
+    private void loadImmediate(String value) {
+        PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI(value));
+    }
+
+    // STO $out_port
     private void generateOutputValue() {
         if (ioOperation == Operation.OUTPUT) {
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.INT_OUTPUT(currentToken.getLexeme()));
         }
     }
     
-    private void openCloseInputOperation() {
-        if (ioOperation == null) {
-            this.ioOperation = Operation.INPUT;
-        } else {
-            this.ioOperation = null;
+    // When we have an Attribution operation
+    private void storeID() {
+        this.stoId = currentSymbol.getName();
+    }
+
+    private Operation searchOperation(String search) {
+        for (Operation operation : Operation.values()) {
+            if (operation.getDescription().equals(search)) {
+                 return operation;
+            }
         }
+        return null;
     }
     
-    private void openCloseOutputOperation() {
-        if (ioOperation == null) {
-            this.ioOperation = Operation.OUTPUT;
-        } else {
-            this.ioOperation = null;
-        }
+    // Retrieve a symbol from SymbolTable
+    public Symbol buildSymbol(String name, String scope) {
+        currentSymbol = new Symbol();
+        currentSymbol.setName(name);
+        currentSymbol.setScope(scope);
+        return PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack);
+    }
+    
+    // When 'For' is found
+    private void modifyScope() {
+        PrimecIDE.scopeStack.push(PrimecIDE.scopeStack.pop() + PrimecIDE.getNextScopeSerial());
+    }
+    
+    // Variable Yet Declared THROWS ERROR
+    private void addSymbol(Symbol symbol) throws SemanticError {
+        PrimecIDE.symbolTable.add(symbol);
     }
     
 }
