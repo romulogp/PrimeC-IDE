@@ -87,6 +87,11 @@ public class AssemblyCodeGenerator {
                 + "\tBNE " + id;
     }
     
+    public final String BEQ(String id) {
+        return "\n"
+                + "\tBEQ " + id;
+    }
+    
     public final String BGE(String id) {
         return "\n"
                 + "\tBGE " + id;

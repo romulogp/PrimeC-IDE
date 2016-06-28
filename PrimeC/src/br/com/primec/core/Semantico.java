@@ -12,6 +12,7 @@ public class Semantico implements Constants {
     private int vectorSize;
     private Symbol ldSymbol;
     private Symbol ldvSymbol;
+    private Symbol forLdSymbol;
     private Token currentToken;
     private Symbol currentSymbol;
     private Operation ioOperation;
@@ -62,6 +63,7 @@ public class Semantico implements Constants {
             case 33: attribution(); break;
             case 34: endAttribution(); break;
             case 35: endVectorDetected(); break;
+            case 41: endForCommand(); break;
             case 42: endWhileCommand(); break;
             case 43: endIfCommand(); break;
             case 44: startElseCommand(); break;
@@ -139,21 +141,16 @@ public class Semantico implements Constants {
     }
     //# 10
     private void popScope() {
-        PrimecIDE.scopeStack.pop();
-//        if (commandOperation == Operation.ELSE) {
-//            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.JMP("fim_" + jumpLabel));
-//        }
-        if (commandOperation == Operation.WHILE) {
-            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.JMP(tempScopeName));
-        }
+        String popped = PrimecIDE.scopeStack.pop();
         if (PrimecIDE.scopeStack.size() == 1) {
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.HLT());
         }
     }
     // #20
     private void forScopeChange() throws SemanticError {
-        modifyScope();
+//        modifyScope();
         varDeclaration();
+        forLdSymbol = ldSymbol;
     }
     // #24
     private void functionParameteresDeclaration() throws SemanticError {
@@ -237,6 +234,17 @@ public class Semantico implements Constants {
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDV(ldvSymbol.getName()));
         }
     }
+    // #41
+    private void endForCommand() {
+        if (!tempScopeName.isEmpty()) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD(forLdSymbol.getName()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.ADD("1001"));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO(forLdSymbol.getName()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.JMP(tempScopeName));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL("fim_" + tempScopeName));
+            tempScopeName = "";
+        }
+    }
     // #42
     private void endWhileCommand() {
         if (!tempScopeName.isEmpty()) {
@@ -273,21 +281,20 @@ public class Semantico implements Constants {
     }
     // #47
     public void endCommandOperation() {
+        if (lineOperation == Operation.FOR && commandOperation == Operation.FOR) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD(forLdSymbol.getName()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL(tempScopeName));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUB("1000"));
+            generateOperationalCode();
+        }
         if ((lineOperation == Operation.IF && commandOperation == Operation.IF)
                 || (lineOperation == Operation.WHILE && commandOperation == Operation.WHILE)) {
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD("1000"));
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.SUB("1001"));
-            tempScopeName = PrimecIDE.scopeStack.lastElement();
-            if (relacionalOperation == Operation.OP_EQ) {
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BNE("fim_" + tempScopeName));
-            } else if (relacionalOperation == Operation.OP_NEQ) {
-                
-            } else if (relacionalOperation == Operation.OP_LT) {
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BGE("fim_" + tempScopeName));
-            } else if (relacionalOperation == Operation.OP_GT) {
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LTE("fim_" + tempScopeName));
-            }
+            generateOperationalCode();
         }
+        tempScopeName = PrimecIDE.scopeStack.lastElement(); 
+        
         commandOperation = null;
     }
     // #48
@@ -305,6 +312,14 @@ public class Semantico implements Constants {
                 || (lineOperation == Operation.WHILE && commandOperation == Operation.WHILE)){
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI(currentToken.getLexeme()));
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("1001"));
+        } else if (commandOperation == Operation.FOR && relacionalOperation != null) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI(currentToken.getLexeme()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("1000"));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI("1"));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("1001"));
+        } else if (commandOperation == Operation.FOR) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LDI(currentToken.getLexeme()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO(forLdSymbol.getName()));
         } else if (vectorOperation == Operation.VECTOR) {
             vectorSize = Integer.parseInt(currentToken.getLexeme());
             PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.VECT(currentSymbol.getName(), vectorSize));
@@ -384,6 +399,25 @@ public class Semantico implements Constants {
     // Variable Yet Declared THROWS ERROR
     private void addSymbol(Symbol symbol) throws SemanticError {
         PrimecIDE.symbolTable.add(symbol);
+    }
+    
+    private void generateOperationalCode() {
+         if (relacionalOperation != null) switch (relacionalOperation) {
+            case OP_EQ:
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BNE("fim_" + tempScopeName));
+                break;
+            case OP_NEQ:
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BEQ("fim_" + tempScopeName));
+                break;
+            case OP_LT:
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.BGE("fim_" + tempScopeName));
+                break;
+            case OP_GT:
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LTE("fim_" + tempScopeName));
+                break;
+            default:
+                break;
+        }
     }
     
 }
