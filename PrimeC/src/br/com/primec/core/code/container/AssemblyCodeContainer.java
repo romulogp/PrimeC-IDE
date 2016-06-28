@@ -37,11 +37,5 @@ public class AssemblyCodeContainer {
     public List<String> getText() {
         return text;
     }
-
-    public static void main(String[] args) {
-        AssemblyCodeContainer acc = new AssemblyCodeContainer();
-        
-        System.out.println(acc.build());
-    }
     
 }
