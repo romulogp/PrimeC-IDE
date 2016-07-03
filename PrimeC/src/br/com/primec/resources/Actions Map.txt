@@ -6,6 +6,7 @@
 #10 Desempilha escopo - stack.pop(token)
 #20 Alteração de escopo
 #24 Variável parâmetro de função
+#28 Retorno de uma funçãose
 #29 Abre e fecha Entrada de dados (INPUT)
 #30 Abre e fecha Saída de dados (OUTPUT)
 #31 Gera código ASM Entrada de ID
@@ -25,3 +26,4 @@
 #71 Valor do Tipo Double
 #99 Fim da Linha
 #100 Uso de variável
+#101 Fim do programa

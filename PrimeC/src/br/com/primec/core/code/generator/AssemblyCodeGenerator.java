@@ -112,6 +112,11 @@ public class AssemblyCodeGenerator {
                 + "\tJMP " + label;
     }
     
+    public final String RET(String value) {
+        return "\n"
+                + "\tRETURN " + value;
+    }
+    
     public final String HLT() {
         return "\n"
                 + "\tHLT 0";

@@ -2,6 +2,8 @@ package br.com.primec.core.table;
 
 public enum Operation {
     
+    RETURN("return"),
+    FUNCTION("function"),
     IF("if"),
     ELSE("else"),
     WHILE("while"),
