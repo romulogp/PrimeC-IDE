@@ -261,13 +261,12 @@ public class Semantico implements Constants {
         }
     }
     // #33
-        private void attribution() {
+    private void attribution() {
         firstExpression = true;
         
         currentOperation = Operation.SUM; // Uma operação sempre inicia como positiva
         attribOperation = Operation.ATTRIB;
         lineOperation = attribOperation;
-        storeID();
     }
     // #34
     private void endAttribution() {
