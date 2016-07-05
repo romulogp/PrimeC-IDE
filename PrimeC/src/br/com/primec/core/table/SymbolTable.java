@@ -35,7 +35,7 @@ public class SymbolTable {
         }
         return null;
     }
-
+    
     public Symbol findDeclaration(Symbol symbol, Stack<String> stack) {
         Stack<String> tempStack = copyStack(stack);
 
@@ -92,6 +92,19 @@ public class SymbolTable {
         return text;
     }
 
+    public Symbol findFunctionParam(String functionName, int paramPos) {
+        int countParam = -1;
+        for (Symbol s : symbols) {
+            if (s.getScope().equals(functionName)) {
+                countParam++;
+                if (countParam == paramPos) {
+                    return s;
+                }
+            }
+        }
+        return null;
+    }
+    
     @Override
     public String toString() {
         String toString = "";

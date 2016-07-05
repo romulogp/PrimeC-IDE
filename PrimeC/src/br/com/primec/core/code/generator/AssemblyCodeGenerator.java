@@ -13,10 +13,24 @@ public class AssemblyCodeGenerator {
                 + "\tSTO " + id;
     }
     
+    /**
+     * 
+     * @param id da variável a ser carregada
+     * @return LD id  STO $out_port
+     */
     public final String OUTPUT(String id) {
         return "\n"
                 + "\tLD " + id
                 + "\n"
+                + "\tSTO $out_port";
+    }
+    
+    /**
+     * Utilizado quando se tem uma função, e, portanto é necessário separar do LD
+     * @return STO $out_port
+     */
+    public final String OUTPUT() {
+        return "\n"
                 + "\tSTO $out_port";
     }
     
@@ -75,6 +89,11 @@ public class AssemblyCodeGenerator {
     public final String STO(String id) {
         return "\n"
                 + "\tSTO " + id;
+    }
+    
+    public final String CALL(String functionName) {
+        return "\n"
+                + "\tCALL " + functionName;
     }
     
     public final String LDV(String id) {

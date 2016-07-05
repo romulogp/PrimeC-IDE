@@ -127,7 +127,6 @@ public class Semantico implements Constants {
             PrimecIDE.asmCodeCon.addData(
                     PrimecIDE.asmCodeGen.VAR(currentSymbol.getName()));
             ldSymbol = currentSymbol;
-//            currentSymbol = null;
         } catch (SemanticError se) {
             throw new SemanticError("A variável \"" + currentSymbol.getName() + "\" já foi declarada.", currentToken.getPosition());
         }
@@ -167,13 +166,20 @@ public class Semantico implements Constants {
     private void pushScope() {
         if (PrimecIDE.scopeStack.lastElement().equals(Scope.GLOBAL.getDescription())) {
             if (hasFunction && !jumped) {
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.JMP("main0"));
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.JMP("main"));
                 jumped = true;
             } else {
-                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL("main0"));
+                PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LBL("main"));
             }
         }
-        PrimecIDE.scopeStack.push(currentToken.getLexeme() + PrimecIDE.getNextScopeSerial());
+        if (commandOperation == Operation.FOR
+                || commandOperation == Operation.WHILE
+                || commandOperation == Operation.IF
+                || commandOperation == Operation.ELSE) {
+            PrimecIDE.scopeStack.push(currentToken.getLexeme() + PrimecIDE.getNextScopeSerial());
+        } else {
+            PrimecIDE.scopeStack.push(currentToken.getLexeme());
+        }
         
         tempScopeName = PrimecIDE.scopeStack.lastElement();
         if (commandOperation != Operation.FUNCTION) {
@@ -196,13 +202,19 @@ public class Semantico implements Constants {
     }
     // #20
     private void forScopeChange() throws SemanticError {
-//        modifyScope();
         varDeclaration();
         forLdSymbol = ldSymbol;
     }
+    // #22
     private void finalizeFunctionCall() {
-        
-        PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO(funcCallName + ));
+        Symbol param = PrimecIDE.symbolTable.findFunctionParam(funcCallName, 0);
+        if (PrimecIDE.symbolTable.findSymbolByName(funcCallName) != null) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO(funcCallName + "_" + param.getName()));
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.CALL(funcCallName));
+        }
+        if (ioOperation == Operation.OUTPUT) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.OUTPUT());
+        }
     }
     // #23
     private void finishExpression() {
@@ -281,6 +293,8 @@ public class Semantico implements Constants {
         currentOperation = Operation.SUM; // Uma operação sempre inicia como positiva
         attribOperation = Operation.ATTRIB;
         lineOperation = attribOperation;
+        
+        storeID();
     }
     // #34
     private void endAttribution() {
@@ -364,8 +378,6 @@ public class Semantico implements Constants {
         currentOperation = Operation.SUM;
         lineOperation = Operation.F_CALL;
     }
-    
-    
     // #49
     private void setCurrentOperation() {
         currentOperation = searchOperation(currentToken.getLexeme());
@@ -461,12 +473,7 @@ public class Semantico implements Constants {
         currentSymbol.setScope(scope);
         return PrimecIDE.symbolTable.findDeclaration(currentSymbol, PrimecIDE.scopeStack);
     }
-    
-    // When 'For' is found
-    private void modifyScope() {
-        PrimecIDE.scopeStack.push(PrimecIDE.scopeStack.pop() + PrimecIDE.getNextScopeSerial());
-    }
-    
+      
     // Variable Yet Declared THROWS ERROR
     private void addSymbol(Symbol symbol) throws SemanticError {
         PrimecIDE.symbolTable.add(symbol);
