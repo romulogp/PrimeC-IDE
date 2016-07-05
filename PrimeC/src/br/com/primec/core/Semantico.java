@@ -8,6 +8,7 @@ import br.com.primec.gui.PrimecIDE;
 
 public class Semantico implements Constants {
 
+    private String funcCallName;
     private String stoId;
     private int vectorSize;
     private Symbol ldSymbol;
@@ -34,6 +35,7 @@ public class Semantico implements Constants {
     }
     
     public final void fullReset() {
+        this.funcCallName = "";
         this.stoId = null;
         this.vectorSize = 0;
         this.ldSymbol = null;
@@ -57,6 +59,7 @@ public class Semantico implements Constants {
     }
     
     public final void init() {
+        this.funcCallName = "";
         this.vectorSize = 0;
         this.ldSymbol = null;
         this.ldvSymbol = null;
@@ -82,6 +85,8 @@ public class Semantico implements Constants {
             case 9: pushScope(); break;
             case 10: popScope(); break;
             case 20: forScopeChange(); break;
+            case 22: finalizeFunctionCall(); break;
+            case 23: finishExpression(); break;
             case 24: functionParameteresDeclaration(); break;
             case 28: setReturnOperation(); break;
             case 29: openCloseInputOperation(); break;
@@ -98,7 +103,7 @@ public class Semantico implements Constants {
             case 45: setVariableInitialized(); break;
             case 46: setRelacionalOperation(); break;
             case 47: endCommandOperation(); break;
-            case 48: setCommandOperation(); break;
+            case 48: setFunctCallOperation(); break;
             case 49: setCurrentOperation(); break;
             case 70: integerValue(); break;
             case 71: doubleValue(); break;
@@ -195,6 +200,14 @@ public class Semantico implements Constants {
         varDeclaration();
         forLdSymbol = ldSymbol;
     }
+    private void finalizeFunctionCall() {
+        
+        PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO(funcCallName + ));
+    }
+    // #23
+    private void finishExpression() {
+        firstExpression = true;
+    }
     // #24
     private void functionParameteresDeclaration() throws SemanticError {
         currentSymbol.setName(currentToken.getLexeme());
@@ -209,7 +222,8 @@ public class Semantico implements Constants {
     }
     // #28
     private void setReturnOperation() {
-        this.currentOperation = Operation.SUM;
+        firstExpression = true;
+        currentOperation = Operation.SUM;
     }
     // #29
     private void openCloseInputOperation() {
@@ -223,8 +237,6 @@ public class Semantico implements Constants {
     private void openCloseOutputOperation() {
         if (ioOperation == null) {
             this.ioOperation = Operation.OUTPUT;
-        } else {
-            this.ioOperation = null;
         }
     }
     // #31
@@ -241,7 +253,9 @@ public class Semantico implements Constants {
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD(currentToken.getLexeme()));
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.STO("1000"));
         }
-        if (ioOperation == Operation.OUTPUT) {
+        if (ioOperation == Operation.OUTPUT && lineOperation == Operation.F_CALL) {
+            PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.LD(currentToken.getLexeme()));
+        } else if (ioOperation == Operation.OUTPUT) {
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.OUTPUT(currentToken.getLexeme()));
         } else if (currentOperation == Operation.SUM) {
             if (firstExpression) {
@@ -345,10 +359,13 @@ public class Semantico implements Constants {
         commandOperation = null;
     }
     // #48
-    public void setCommandOperation() {
-        this.commandOperation = searchOperation(currentToken.getLexeme());
-        this.lineOperation = commandOperation;
+    public void setFunctCallOperation() {
+        funcCallName = currentToken.getLexeme();
+        currentOperation = Operation.SUM;
+        lineOperation = Operation.F_CALL;
     }
+    
+    
     // #49
     private void setCurrentOperation() {
         currentOperation = searchOperation(currentToken.getLexeme());
@@ -371,6 +388,9 @@ public class Semantico implements Constants {
             vectorSize = Integer.parseInt(currentToken.getLexeme());
             PrimecIDE.asmCodeCon.addData(PrimecIDE.asmCodeGen.VECT(currentSymbol.getName(), vectorSize));
             vectorOperation = null;
+        } else if (lineOperation == Operation.F_CALL) {
+            
+            
         } else if (ioOperation == Operation.OUTPUT) {
             generateOutputValue();
         } else if (currentOperation == Operation.SUM) {
@@ -415,7 +435,7 @@ public class Semantico implements Constants {
 
     // STO $out_port
     private void generateOutputValue() {
-        if (ioOperation == Operation.OUTPUT) {
+        if (ioOperation == Operation.OUTPUT && lineOperation != Operation.F_CALL) {
             PrimecIDE.asmCodeCon.addText(PrimecIDE.asmCodeGen.INT_OUTPUT(currentToken.getLexeme()));
         }
     }
@@ -450,6 +470,11 @@ public class Semantico implements Constants {
     // Variable Yet Declared THROWS ERROR
     private void addSymbol(Symbol symbol) throws SemanticError {
         PrimecIDE.symbolTable.add(symbol);
+    }
+    
+    public void setCommandOperation() {
+        this.commandOperation = searchOperation(currentToken.getLexeme());
+        this.lineOperation = commandOperation;
     }
     
     private void generateRerationalCode() {

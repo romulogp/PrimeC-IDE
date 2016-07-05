@@ -273,7 +273,7 @@
                     </Property>
                     <Property name="rows" type="int" value="5"/>
                     <Property name="tabSize" type="int" value="2"/>
-                    <Property name="text" type="java.lang.String" value="int teste(int valor) {&#xa;&#x9;ret valor;&#xa;}&#xa;&#xa;void main() {&#xa;&#xa;}"/>
+                    <Property name="text" type="java.lang.String" value="int teste(int valor) {&#xa;&#x9;ret valor;&#xa;}&#xa;&#xa;void main() {&#xa;&#x9;int a;&#xa;&#x9;output(teste(a));&#xa;}"/>
                   </Properties>
                   <Events>
                     <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="jTextAreaCodeKeyTyped"/>

@@ -2,6 +2,7 @@ package br.com.primec.core.table;
 
 public enum Operation {
     
+    F_CALL("call"),
     RETURN("return"),
     FUNCTION("function"),
     IF("if"),

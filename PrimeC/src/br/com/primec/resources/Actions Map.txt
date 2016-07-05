@@ -5,6 +5,8 @@
 #9  Empilha escopo - stack.push(token)
 #10 Desempilha escopo - stack.pop(token)
 #20 Alteração de escopo
+#22 Finaliza chamada de função
+#23 Reinicia firstExpression
 #24 Variável parâmetro de função
 #28 Retorno de uma funçãose
 #29 Abre e fecha Entrada de dados (INPUT)
